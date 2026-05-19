@@ -4,9 +4,8 @@ export default function Header({ hasImage, onUpload, onDownload, generating, the
       <div className="hdr-left">
         <div className="logo">
           <span className="logo-mark">M</span>
-          <span className="logo-word">MEMEFORGE</span>
+          <span className="logo-word">EMEFORGE</span>
         </div>
-        {!isMobile && <div className="tagline mono">v0.1 / certified meme operations</div>}
       </div>
       <div className="hdr-right">
         <button className="btn btn-ghost theme-btn" onClick={onToggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>

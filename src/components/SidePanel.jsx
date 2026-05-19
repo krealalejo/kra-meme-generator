@@ -56,7 +56,7 @@ export default function SidePanel({
           }
         >
           {texts.length === 0 ? (
-            <div className="empty mono">no text yet. hit + to add one.</div>
+            <div className="empty mono">no text yet. hit + to add one</div>
           ) : (
             <div className="layer-list">
               {texts.map((t, idx) => (
@@ -96,9 +96,9 @@ export default function SidePanel({
       ) : (
         <PanelBlock title="EDIT" subtitle="nothing selected">
           <div className="empty mono">
-            tap a layer above or on the canvas to edit it.
+            tap a layer above or on the canvas to edit
             <br /><br />
-            <span style={{ opacity: 0.7 }}>tip: double-tap a layer to retype it fast.</span>
+            <span style={{ opacity: 0.7 }}>tip: double-tap a layer to retype it fast</span>
           </div>
         </PanelBlock>
       ))}
