@@ -17,6 +17,11 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('mf-theme') || 'light')
 
   useEffect(() => {
+    const splash = document.querySelector('.splash')
+    if (splash) splash.remove()
+  }, [])
+
+  useEffect(() => {
     document.documentElement.dataset.theme = theme
     localStorage.setItem('mf-theme', theme)
   }, [theme])

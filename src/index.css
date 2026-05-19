@@ -698,7 +698,6 @@ input, select, textarea { font-family: inherit; }
   z-index: 300;
 }
 
-.splash { display: none !important; }
 
 @media (max-width: 900px) {
   .main { grid-template-columns: 1fr; }
