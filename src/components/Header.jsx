@@ -9,7 +9,7 @@ export default function Header({ hasImage, onUpload, onDownload, generating, the
         <div className="tagline mono">v0.1 / certified meme operations</div>
       </div>
       <div className="hdr-right">
-        <button className="theme-btn" onClick={onToggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+        <button className="btn btn-ghost theme-btn" onClick={onToggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
           {theme === 'dark' ? '☀' : '☾'}
         </button>
         <button className="btn btn-ghost" onClick={onUpload}>
