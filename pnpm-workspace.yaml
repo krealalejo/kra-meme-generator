@@ -1,0 +1,6 @@
+packages:
+  - '.'
+
+minimumReleaseAgeExclude:
+  - electron-to-chromium
+  - postcss
