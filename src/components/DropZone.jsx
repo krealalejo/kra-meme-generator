@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
+import { gsap } from 'gsap'
 import { SAMPLE_IMAGES } from '../utils/text'
 
 function FloatingStickers() {
@@ -25,8 +26,30 @@ function FloatingStickers() {
 
 export default function DropZone({ onPickFile, onSample }) {
   const [hover, setHover] = useState(false)
+  const dropRef = useRef(null)
+
+  useEffect(() => {
+    if (dropRef.current) {
+      gsap.fromTo(dropRef.current,
+        { opacity: 0, scale: 0.97 },
+        { opacity: 1, scale: 1, duration: 0.3, ease: 'back.out(1.5)' }
+      )
+    }
+  }, [])
+
+  const handleSampleClick = (e, src) => {
+    e.stopPropagation()
+    const chip = e.currentTarget
+    gsap.timeline()
+      .to(chip, { scale: 0.88, duration: 0.07, ease: 'power2.in' })
+      .to(chip, { scale: 1.12, duration: 0.13, ease: 'back.out(3)' })
+      .to(chip, { scale: 1, duration: 0.09 })
+    onSample(src)
+  }
+
   return (
     <div
+      ref={dropRef}
       className={'drop ' + (hover ? 'is-hover' : '')}
       onDragEnter={() => setHover(true)}
       onDragLeave={() => setHover(false)}
@@ -50,7 +73,7 @@ export default function DropZone({ onPickFile, onSample }) {
               <button
                 key={s.label}
                 className="sample-chip"
-                onClick={(e) => { e.stopPropagation(); onSample(s.src) }}
+                onClick={(e) => handleSampleClick(e, s.src)}
               >
                 <img src={s.src} alt="" />
                 <span className="mono">{s.label}</span>

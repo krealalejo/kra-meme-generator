@@ -1,3 +1,4 @@
+import { gsap } from 'gsap'
 import TextEditor from './TextEditor'
 
 function PanelBlock({ title, subtitle, action, children }) {
@@ -69,7 +70,15 @@ export default function SidePanel({
                   <span className="layer-row-text">{t.text || '(empty)'}</span>
                   <span
                     className="layer-row-x"
-                    onClick={(e) => { e.stopPropagation(); removeText(t.id) }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      const row = e.currentTarget.closest('.layer-row')
+                      gsap.to(row, {
+                        x: -16, opacity: 0, height: 0, paddingTop: 0, paddingBottom: 0,
+                        duration: 0.18, ease: 'power2.in',
+                        onComplete: () => removeText(t.id),
+                      })
+                    }}
                     title="delete"
                   >
                     ×

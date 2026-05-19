@@ -174,6 +174,7 @@ export default function App() {
   const toggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'))
 
   const stageRef = useRef(null)
+  const stageWrapRef = useRef(null)
   const fileInputRef = useRef(null)
 
   const selected = texts.find((t) => t.id === selectedId)
@@ -182,12 +183,23 @@ export default function App() {
     const img = new Image()
     img.crossOrigin = 'anonymous'
     img.onload = () => {
-      setImage({ src, w: img.naturalWidth, h: img.naturalHeight })
-      setTexts([
-        mkText({ text: 'TOP TEXT', y: 0.08 }),
-        mkText({ text: 'BOTTOM TEXT', y: 0.86 }),
-      ])
-      setSelectedId(null)
+      const swap = () => {
+        setImage({ src, w: img.naturalWidth, h: img.naturalHeight })
+        setTexts([
+          mkText({ text: 'TOP TEXT', y: 0.08 }),
+          mkText({ text: 'BOTTOM TEXT', y: 0.86 }),
+        ])
+        setSelectedId(null)
+        gsap.set(stageWrapRef.current, { clearProps: 'opacity,scale' })
+      }
+      if (stageWrapRef.current) {
+        gsap.to(stageWrapRef.current, {
+          opacity: 0, scale: 0.97, duration: 0.15, ease: 'power2.in',
+          onComplete: swap,
+        })
+      } else {
+        swap()
+      }
     }
     img.onerror = () => setToast("couldn't load that image")
     img.src = src
@@ -318,7 +330,7 @@ export default function App() {
       />
 
       <main className="main">
-        <section className="stage-wrap">
+        <section className="stage-wrap" ref={stageWrapRef}>
           {!image ? (
             <DropZone
               onPickFile={() => fileInputRef.current?.click()}
@@ -357,7 +369,15 @@ export default function App() {
             removeText={removeText}
             duplicateText={duplicateText}
             onReplaceImage={() => fileInputRef.current?.click()}
-            onClearImage={() => { setImage(null); setTexts([]); setSelectedId(null) }}
+            onClearImage={() => {
+              gsap.to(stageWrapRef.current, {
+                opacity: 0, scale: 0.97, duration: 0.15, ease: 'power2.in',
+                onComplete: () => {
+                  gsap.set(stageWrapRef.current, { clearProps: 'opacity,scale' })
+                  setImage(null); setTexts([]); setSelectedId(null)
+                },
+              })
+            }}
             isMobile={isMobile}
             mobileTab={mobileTab}
           />

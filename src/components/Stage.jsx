@@ -1,4 +1,5 @@
 import { forwardRef, useRef, useState, useEffect } from 'react'
+import { gsap } from 'gsap'
 import TextLayer from './TextLayer'
 
 function StageMeta({ image, box, count }) {
@@ -19,6 +20,16 @@ const Stage = forwardRef(function Stage(
 ) {
   const innerRef = useRef(null)
   const [box, setBox] = useState({ w: 0, h: 0 })
+
+  useEffect(() => {
+    if (innerRef.current) {
+      gsap.fromTo(
+        innerRef.current,
+        { opacity: 0, scale: 0.95, y: 8 },
+        { opacity: 1, scale: 1, y: 0, duration: 0.35, ease: 'back.out(1.6)' }
+      )
+    }
+  }, [])
 
   useEffect(() => {
     const el = innerRef.current?.parentElement

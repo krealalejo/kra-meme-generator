@@ -1,3 +1,5 @@
+import { useRef } from 'react'
+import { gsap } from 'gsap'
 import { FONTS, PRESET_COLORS, STROKE_COLORS } from '../constants'
 
 function Row({ label, children }) {
@@ -30,8 +32,17 @@ function Swatches({ colors, value, onChange }) {
 }
 
 export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }) {
+  const editorRef = useRef(null)
+
+  const handleDelete = () => {
+    gsap.to(editorRef.current, {
+      x: -12, opacity: 0, duration: 0.18, ease: 'power2.in',
+      onComplete: onDelete,
+    })
+  }
+
   return (
-    <div className="editor">
+    <div className="editor" ref={editorRef}>
       <textarea
         className="ed-text"
         value={t.text}
@@ -118,7 +129,7 @@ export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }) {
 
       <div className="ed-actions">
         <button className="mini-btn" onClick={onDuplicate}>duplicate</button>
-        <button className="mini-btn danger" onClick={onDelete}>delete</button>
+        <button className="mini-btn danger" onClick={handleDelete}>delete</button>
       </div>
     </div>
   )
