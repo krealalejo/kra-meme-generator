@@ -8,6 +8,68 @@ import GenOverlay from './components/GenOverlay'
 import { mkText } from './utils/text'
 import { renderToBlob, triggerDownload } from './utils/canvas'
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches
+  )
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 820px)')
+    const h = (e) => setIsMobile(e.matches)
+    mq.addEventListener('change', h)
+    return () => mq.removeEventListener('change', h)
+  }, [])
+  return isMobile
+}
+
+function MobileSheetHeader({ tab, setTab, open, setOpen, counts }) {
+  const tabs = [
+    { id: 'image', label: 'IMAGE', badge: counts.hasImage ? '•' : '' },
+    { id: 'layers', label: 'LAYERS', badge: counts.layers > 0 ? String(counts.layers) : '' },
+    { id: 'edit', label: 'EDIT', badge: counts.hasSel ? '•' : '' },
+  ]
+  return (
+    <div className="sheet-hdr">
+      <button className="sheet-grab" onClick={() => setOpen(!open)} aria-label={open ? 'close panel' : 'open panel'}>
+        <span className="grab-bar" />
+      </button>
+      <div className="sheet-tabs">
+        {tabs.map((t) => (
+          <button
+            key={t.id}
+            className={'sheet-tab ' + (tab === t.id && open ? 'is-on' : '')}
+            onClick={() => {
+              if (tab === t.id && open) {
+                setOpen(false)
+              } else {
+                setTab(t.id)
+                setOpen(true)
+              }
+            }}
+          >
+            <span>{t.label}</span>
+            {t.badge && <span className="sheet-tab-badge">{t.badge}</span>}
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function MobileFab({ generating, onDownload }) {
+  return (
+    <div className="fab-wrap">
+      <button
+        className={'fab fab-dl ' + (generating ? 'is-busy' : '')}
+        onClick={onDownload}
+        disabled={generating}
+        aria-label="download meme"
+      >
+        {generating ? '…' : '↓ PNG'}
+      </button>
+    </div>
+  )
+}
+
 export default function App() {
   const [image, setImage] = useState(null)
   const [texts, setTexts] = useState([])
@@ -15,11 +77,21 @@ export default function App() {
   const [generating, setGenerating] = useState(false)
   const [toast, setToast] = useState(null)
   const [theme, setTheme] = useState(() => localStorage.getItem('mf-theme') || 'light')
+  const [mobileTab, setMobileTab] = useState('layers')
+  const [sheetOpen, setSheetOpen] = useState(false)
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     const splash = document.querySelector('.splash')
     if (splash) splash.remove()
   }, [])
+
+  useEffect(() => {
+    if (isMobile && selectedId) {
+      setMobileTab('edit')
+      setSheetOpen(true)
+    }
+  }, [selectedId, isMobile])
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -158,8 +230,10 @@ export default function App() {
     setGenerating(false)
   }
 
+  const appClass = ['app', isMobile && 'is-mobile', isMobile && sheetOpen && 'sheet-open'].filter(Boolean).join(' ')
+
   return (
-    <div className="app">
+    <div className={appClass}>
       <Header
         hasImage={!!image}
         onUpload={() => fileInputRef.current?.click()}
@@ -167,6 +241,7 @@ export default function App() {
         generating={generating}
         theme={theme}
         onToggleTheme={toggleTheme}
+        isMobile={isMobile}
       />
 
       <main className="main">
@@ -189,6 +264,15 @@ export default function App() {
         </section>
 
         <aside className="side">
+          {isMobile && (
+            <MobileSheetHeader
+              tab={mobileTab}
+              setTab={setMobileTab}
+              open={sheetOpen}
+              setOpen={setSheetOpen}
+              counts={{ layers: texts.length, hasImage: !!image, hasSel: !!selected }}
+            />
+          )}
           <SidePanel
             image={image}
             texts={texts}
@@ -201,9 +285,15 @@ export default function App() {
             duplicateText={duplicateText}
             onReplaceImage={() => fileInputRef.current?.click()}
             onClearImage={() => { setImage(null); setTexts([]); setSelectedId(null) }}
+            isMobile={isMobile}
+            mobileTab={mobileTab}
           />
         </aside>
       </main>
+
+      {isMobile && image && (
+        <MobileFab generating={generating} onDownload={handleDownload} />
+      )}
 
       <input
         ref={fileInputRef}
