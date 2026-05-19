@@ -2,7 +2,7 @@
 
 MEMEFORGE is a sleek, highly interactive single-page web application for creating and customizing memes. It provides real-time canvas overlays, drag-and-drop file uploads, inline double-click editing, and an offscreen canvas rendering system that exports high-resolution memes. The UI implements a bold, colorful Neobrutalism design system that is fully responsive, dark-mode ready, and optimized for mobile devices.
 
-**Stack:** React **19**, Vite **6**, GSAP **3**, Vitest **2**, Vanilla CSS.
+**Stack:** React **19**, Vite **6**, GSAP **3**, Vitest **4**, Vanilla CSS.
 
 ---
 
@@ -16,10 +16,9 @@ MEMEFORGE is a sleek, highly interactive single-page web application for creatin
 
 ## Quick Start
 
-1. Copy `.env.example` to `.env` and set the required variables.
-2. Install dependencies: `pnpm install`
-3. Run the development server: `pnpm dev`
-4. Access the app at `http://localhost:5173`
+1. Install dependencies: `pnpm install`
+2. Run the development server: `pnpm dev`
+3. Access the app at `http://localhost:5173`
 
 ---
 
@@ -30,7 +29,10 @@ MEMEFORGE is a sleek, highly interactive single-page web application for creatin
 | Install dependencies | `pnpm install` |
 | Run dev server | `pnpm dev` |
 | Build for production | `pnpm build` |
-| Unit tests | `pnpm test` |
+| Unit tests (watch) | `pnpm test` |
+| Unit tests (run once) | `pnpm test:run` |
+| Test UI | `pnpm test:ui` |
+| Test coverage | `pnpm test:coverage` |
 
 ---
 
