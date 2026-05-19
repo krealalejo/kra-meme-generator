@@ -1,4 +1,4 @@
-export default function Header({ hasImage, onUpload, onDownload, generating }) {
+export default function Header({ hasImage, onUpload, onDownload, generating, theme, onToggleTheme }) {
   return (
     <header className="hdr">
       <div className="hdr-left">
@@ -9,6 +9,9 @@ export default function Header({ hasImage, onUpload, onDownload, generating }) {
         <div className="tagline mono">v0.1 / certified meme operations</div>
       </div>
       <div className="hdr-right">
+        <button className="theme-btn" onClick={onToggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+          {theme === 'dark' ? '☀' : '☾'}
+        </button>
         <button className="btn btn-ghost" onClick={onUpload}>
           <span>↑</span> {hasImage ? 'REPLACE' : 'UPLOAD'}
         </button>

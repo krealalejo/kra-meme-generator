@@ -14,6 +14,14 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null)
   const [generating, setGenerating] = useState(false)
   const [toast, setToast] = useState(null)
+  const [theme, setTheme] = useState(() => localStorage.getItem('mf-theme') || 'light')
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    localStorage.setItem('mf-theme', theme)
+  }, [theme])
+
+  const toggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'))
 
   const stageRef = useRef(null)
   const fileInputRef = useRef(null)
@@ -152,6 +160,8 @@ export default function App() {
         onUpload={() => fileInputRef.current?.click()}
         onDownload={handleDownload}
         generating={generating}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       <main className="main">

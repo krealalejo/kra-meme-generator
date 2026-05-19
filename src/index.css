@@ -10,6 +10,25 @@
   --blue: #2E6BFF;
   --shadow: 6px 6px 0 0 var(--ink);
   --shadow-sm: 3px 3px 0 0 var(--ink);
+  --dot-color: rgba(14,14,14,0.08);
+  --overlay-bg: rgba(242,238,229,0.92);
+  --focus-bg: #ffffff;
+  --dot-muted: rgba(0,0,0,0.25);
+  --dashed-sep: rgba(0,0,0,0.2);
+}
+
+[data-theme="dark"] {
+  --bg: #1C1A14;
+  --bg-2: #252319;
+  --ink: #F2EEE5;
+  --ink-2: #D0C8B8;
+  --muted: #8A8278;
+  --line: #F2EEE5;
+  --dot-color: rgba(242,238,229,0.07);
+  --overlay-bg: rgba(28,26,20,0.92);
+  --focus-bg: #2a2820;
+  --dot-muted: rgba(242,238,229,0.25);
+  --dashed-sep: rgba(242,238,229,0.2);
 }
 
 * { box-sizing: border-box; }
@@ -26,7 +45,7 @@ html, body {
 }
 
 body {
-  background-image: radial-gradient(circle at 1px 1px, rgba(14,14,14,0.08) 1px, transparent 0);
+  background-image: radial-gradient(circle at 1px 1px, var(--dot-color) 1px, transparent 0);
   background-size: 22px 22px;
 }
 
@@ -98,6 +117,28 @@ input, select, textarea { font-family: inherit; }
   letter-spacing: 0.5px;
 }
 .hdr-right { display: flex; align-items: center; gap: 12px; }
+.theme-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--bg);
+  border: 2.5px solid var(--ink);
+  box-shadow: var(--shadow-sm);
+  font-size: 18px;
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  flex-shrink: 0;
+}
+.theme-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 0 var(--ink);
+}
+.theme-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 0 var(--ink);
+}
 
 .btn {
   display: inline-flex;
@@ -267,7 +308,7 @@ input, select, textarea { font-family: inherit; }
   color: var(--muted);
   letter-spacing: 1px;
 }
-.stage-meta .dot { color: rgba(0,0,0,0.25); }
+.stage-meta .dot { color: var(--dot-muted); }
 
 .layer {
   position: absolute;
@@ -445,7 +486,7 @@ input, select, textarea { font-family: inherit; }
   color: var(--ink);
   min-height: 56px;
 }
-.ed-text:focus { outline: none; background: white; }
+.ed-text:focus { outline: none; background: var(--focus-bg); }
 
 .ed-row {
   display: grid;
@@ -565,14 +606,14 @@ input, select, textarea { font-family: inherit; }
   gap: 8px;
   margin-top: 6px;
   padding-top: 12px;
-  border-top: 1px dashed rgba(0,0,0,0.2);
+  border-top: 1px dashed var(--dashed-sep);
 }
 
 .gen-overlay {
   position: fixed;
   inset: 0;
   z-index: 200;
-  background: rgba(242, 238, 229, 0.92);
+  background: var(--overlay-bg);
   pointer-events: none;
   display: flex;
   align-items: center;
