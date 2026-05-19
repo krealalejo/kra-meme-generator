@@ -11,15 +11,20 @@ export function triggerDownload(blob, name) {
   setTimeout(() => URL.revokeObjectURL(url), 5000)
 }
 
-export async function renderToBlob(image, texts) {
+export async function renderToBlob(image, texts, scale = 2) {
+  await document.fonts.ready
   const img = await loadImg(image.src)
+  const W = image.w * scale
+  const H = image.h * scale
   const canvas = document.createElement('canvas')
-  canvas.width = image.w
-  canvas.height = image.h
+  canvas.width = W
+  canvas.height = H
   const ctx = canvas.getContext('2d')
-  ctx.drawImage(img, 0, 0, image.w, image.h)
+  ctx.imageSmoothingEnabled = true
+  ctx.imageSmoothingQuality = 'high'
+  ctx.drawImage(img, 0, 0, W, H)
   for (const t of texts) {
-    drawText(ctx, t, image.w, image.h)
+    drawText(ctx, t, W, H)
   }
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
 }
