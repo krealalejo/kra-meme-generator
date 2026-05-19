@@ -1,3 +1,6 @@
+import pepeMage from '../assets/pepe-mage.png'
+import pepeSad from '../assets/pepe-sad.png'
+import pepe from '../assets/pepe.png'
 export function clamp(v, a, b) {
   return Math.max(a, Math.min(b, v))
 }
@@ -41,7 +44,7 @@ export function makeSamplePlaceholder(bg, line1, line2) {
 }
 
 export const SAMPLE_IMAGES = [
-  { label: 'DOGE', src: makeSamplePlaceholder('#F4D272', 'VERY MEME', 'such test') },
-  { label: 'GUY', src: makeSamplePlaceholder('#9AD6E8', 'POV', 'you are a guy') },
-  { label: 'CAT', src: makeSamplePlaceholder('#E3A8C9', 'ME LOOKING', 'at the fridge') },
+  { label: 'PEPE MAGE', src: pepeMage },
+  { label: 'PEPE SAD', src: pepeSad },
+  { label: 'PEPE', src: pepe },
 ]
