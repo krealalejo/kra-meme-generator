@@ -47,6 +47,10 @@
   color: #0E0E0E;
 }
 
+[data-theme="dark"] .logo-mark {
+  color: #0E0E0E;
+}
+
 * { box-sizing: border-box; }
 
 html, body {
