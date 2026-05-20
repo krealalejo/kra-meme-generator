@@ -79,7 +79,7 @@ export default function DropZone({ onPickFile, onSample }) {
                 className="sample-chip"
                 onClick={(e) => handleSampleClick(e, s.src)}
               >
-                <img src={s.src} alt="" />
+                <img src={s.thumb} alt="" width="60" height="60" />
                 <span className="mono">{s.label}</span>
               </button>
             ))}

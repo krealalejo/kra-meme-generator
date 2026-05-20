@@ -1,6 +1,9 @@
 import pepeMage from '../assets/pepe-mage.webp'
 import pepeSad from '../assets/pepe-sad.webp'
 import pepe from '../assets/pepe.webp'
+import pepeMageThumb from '../assets/pepe-mage-thumb.webp'
+import pepeSadThumb from '../assets/pepe-sad-thumb.webp'
+import pepeThumb from '../assets/pepe-thumb.webp'
 export function clamp(v, a, b) {
   return Math.max(a, Math.min(b, v))
 }
@@ -59,7 +62,7 @@ export function makeSamplePlaceholder(bg, line1, line2) {
 }
 
 export const SAMPLE_IMAGES = [
-  { label: 'PEPE MAGE', src: pepeMage },
-  { label: 'PEPE SAD', src: pepeSad },
-  { label: 'PEPE', src: pepe },
+  { label: 'PEPE MAGE', src: pepeMage, thumb: pepeMageThumb },
+  { label: 'PEPE SAD', src: pepeSad, thumb: pepeSadThumb },
+  { label: 'PEPE', src: pepe, thumb: pepeThumb },
 ]
