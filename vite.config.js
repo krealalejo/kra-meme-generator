@@ -11,7 +11,13 @@ export default defineConfig({
       provider: 'v8',
       reporter: ['lcov', 'text'],
       include: ['src/**'],
-      exclude: ['src/test-setup.js', '**/*.test.*'],
+      exclude: ['src/test-setup.js', '**/*.test.*', 'src/main.jsx', 'src/index.css', 'src/assets/**'],
+      thresholds: {
+        lines: 80,
+        statements: 80,
+        branches: 75,
+        functions: 80,
+      },
     },
   },
 })

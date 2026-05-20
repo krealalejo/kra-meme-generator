@@ -63,8 +63,6 @@ flowchart TD
   App --> CanvasUtils[canvas.js: Offscreen Canvas Render]
 ```
 
-> Full system architecture (C4 Level 1, 2 & 3): [kra-docs-architecture](https://github.com/krealalejo/kra-docs-architecture)
-
 **Structure:** The codebase follows a single-page app architecture centered around state in `App.jsx`. All mutable state (the loaded image, custom text layers, active selections, and loader status) is declared at the root of the tree and distributed to display components via props and change handlers. Drag-and-drop operations scale normalized coordinates (`0` to `1` range) relative to the image size, allowing resolution-independent rendering. When exporting, `canvas.js` uses an offscreen HTML5 `<canvas>` to draw the final PNG at high quality.
 
 ### Source layout
@@ -98,19 +96,3 @@ kra-memes/
         ├── text.js
         └── text.test.js
 ```
-
----
-
-## Configuration
-
-| Variable | Purpose |
-|----------|---------|
-| *(None)* | No environment variables are currently required for this project. |
-
----
-
-## Deployment
-
-Managed by **Terraform** (`kra-infra`) and deployed via **GitHub Actions**. The pipeline automatically builds the production asset bundle and deploys it to the host environment.
-
-> Run `kra-start` to start the EC2 instance before triggering a deploy pipeline run.
