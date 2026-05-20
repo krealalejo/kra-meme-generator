@@ -1,6 +1,12 @@
 import { useRef } from 'react'
+import PropTypes from 'prop-types'
 import { gsap } from 'gsap'
 import { FONTS, PRESET_COLORS, STROKE_COLORS } from '../constants'
+
+Row.propTypes = {
+  label: PropTypes.string.isRequired,
+  children: PropTypes.node.isRequired,
+}
 
 function Row({ label, children }) {
   return (
@@ -9,6 +15,12 @@ function Row({ label, children }) {
       <div className="ed-control">{children}</div>
     </div>
   )
+}
+
+Swatches.propTypes = {
+  colors: PropTypes.arrayOf(PropTypes.string).isRequired,
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
 }
 
 function Swatches({ colors, value, onChange }) {
@@ -69,7 +81,7 @@ export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }) {
       <Row label="SIZE">
         <input
           type="range" min="0.02" max="0.4" step="0.005" value={t.size}
-          onChange={(e) => onUpdate({ size: parseFloat(e.target.value) })}
+          onChange={(e) => onUpdate({ size: Number.parseFloat(e.target.value) })}
         />
         <span className="mono val">{Math.round(t.size * 100)}</span>
       </Row>
@@ -77,7 +89,7 @@ export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }) {
       <Row label="ROTATE">
         <input
           type="range" min="-45" max="45" step="1" value={t.rotation}
-          onChange={(e) => onUpdate({ rotation: parseInt(e.target.value) })}
+          onChange={(e) => onUpdate({ rotation: Number.parseInt(e.target.value) })}
         />
         <span className="mono val">{t.rotation}°</span>
       </Row>
@@ -85,7 +97,7 @@ export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }) {
       <Row label="STROKE">
         <input
           type="range" min="0" max="1" step="0.05" value={t.stroke}
-          onChange={(e) => onUpdate({ stroke: parseFloat(e.target.value) })}
+          onChange={(e) => onUpdate({ stroke: Number.parseFloat(e.target.value) })}
         />
         <span className="mono val">{t.stroke.toFixed(2)}</span>
       </Row>
@@ -93,7 +105,7 @@ export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }) {
       <Row label="TRACK">
         <input
           type="range" min="-0.05" max="0.25" step="0.005" value={t.tracking}
-          onChange={(e) => onUpdate({ tracking: parseFloat(e.target.value) })}
+          onChange={(e) => onUpdate({ tracking: Number.parseFloat(e.target.value) })}
         />
         <span className="mono val">{t.tracking.toFixed(2)}</span>
       </Row>
@@ -133,4 +145,25 @@ export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }) {
       </div>
     </div>
   )
+}
+
+const textLayerShape = PropTypes.shape({
+  text: PropTypes.string,
+  font: PropTypes.string,
+  size: PropTypes.number,
+  rotation: PropTypes.number,
+  stroke: PropTypes.number,
+  tracking: PropTypes.number,
+  color: PropTypes.string,
+  strokeColor: PropTypes.string,
+  uppercase: PropTypes.bool,
+  weight: PropTypes.number,
+  shadow: PropTypes.bool,
+})
+
+TextEditor.propTypes = {
+  t: textLayerShape.isRequired,
+  onUpdate: PropTypes.func.isRequired,
+  onDuplicate: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
 }

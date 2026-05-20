@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import PropTypes from 'prop-types'
 import { FONTS } from '../constants'
 import { clamp } from '../utils/text'
 import { startDrag } from '../hooks/useDrag'
@@ -44,9 +45,12 @@ const TextLayer = memo(function TextLayer({ t, box, selected, onSelect, onUpdate
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       className={'layer ' + (selected ? 'is-selected' : '')}
       style={style}
       onPointerDown={onPointerDown}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(t.id) }}
       onDoubleClick={(e) => {
         e.stopPropagation()
         const val = prompt('edit text', t.text)
@@ -69,5 +73,28 @@ const TextLayer = memo(function TextLayer({ t, box, selected, onSelect, onUpdate
     </div>
   )
 })
+
+TextLayer.propTypes = {
+  t: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    x: PropTypes.number,
+    y: PropTypes.number,
+    size: PropTypes.number,
+    font: PropTypes.string,
+    color: PropTypes.string,
+    weight: PropTypes.number,
+    tracking: PropTypes.number,
+    uppercase: PropTypes.bool,
+    rotation: PropTypes.number,
+    stroke: PropTypes.number,
+    strokeColor: PropTypes.string,
+    shadow: PropTypes.bool,
+    text: PropTypes.string,
+  }).isRequired,
+  box: PropTypes.shape({ w: PropTypes.number.isRequired, h: PropTypes.number.isRequired }).isRequired,
+  selected: PropTypes.bool,
+  onSelect: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func.isRequired,
+}
 
 export default TextLayer

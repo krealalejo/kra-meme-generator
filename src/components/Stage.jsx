@@ -1,4 +1,5 @@
 import { forwardRef, memo, useRef, useState, useEffect, useCallback } from 'react'
+import PropTypes from 'prop-types'
 import { gsap } from 'gsap'
 import TextLayer from './TextLayer'
 import ImageLayer from './ImageLayer'
@@ -14,6 +15,12 @@ const StageMeta = memo(function StageMeta({ image, box, count }) {
     </div>
   )
 })
+
+StageMeta.propTypes = {
+  image: PropTypes.shape({ w: PropTypes.number.isRequired, h: PropTypes.number.isRequired }).isRequired,
+  box: PropTypes.shape({ w: PropTypes.number.isRequired }).isRequired,
+  count: PropTypes.number.isRequired,
+}
 
 const Stage = forwardRef(function Stage(
   { image, layers, selectedId, setSelectedId, updateLayer },
@@ -55,6 +62,7 @@ const Stage = forwardRef(function Stage(
   return (
     <div className="stage-outer">
       <div
+        role="presentation"
         className="stage"
         ref={(el) => { innerRef.current = el; if (ref) ref.current = el }}
         style={{ width: box.w, height: box.h }}
@@ -87,5 +95,13 @@ const Stage = forwardRef(function Stage(
     </div>
   )
 })
+
+Stage.propTypes = {
+  image: PropTypes.shape({ src: PropTypes.string.isRequired, w: PropTypes.number.isRequired, h: PropTypes.number.isRequired }).isRequired,
+  layers: PropTypes.arrayOf(PropTypes.object).isRequired,
+  selectedId: PropTypes.string,
+  setSelectedId: PropTypes.func.isRequired,
+  updateLayer: PropTypes.func.isRequired,
+}
 
 export default Stage
