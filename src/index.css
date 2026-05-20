@@ -167,7 +167,7 @@ input, select, textarea { font-family: inherit; }
   border: 2.5px solid var(--ink);
   color: var(--ink);
   box-shadow: var(--shadow-sm);
-  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  transition: transform 0.08s ease;
 }
 .btn:hover:not(:disabled) {
   transform: translate(-1px, -1px);
