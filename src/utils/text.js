@@ -7,6 +7,7 @@ export function clamp(v, a, b) {
 
 export function mkText(opts = {}) {
   return {
+    type: 'text',
     id: crypto.randomUUID(),
     text: 'TEXT',
     x: 0.5,
@@ -21,6 +22,20 @@ export function mkText(opts = {}) {
     tracking: 0.02,
     uppercase: true,
     shadow: false,
+    ...opts,
+  }
+}
+
+export function mkImageLayer(opts = {}) {
+  return {
+    type: 'image',
+    id: crypto.randomUUID(),
+    src: '',
+    x: 0.5,
+    y: 0.5,
+    w: 0.35,
+    aspectRatio: 1,
+    rotation: 0,
     ...opts,
   }
 }

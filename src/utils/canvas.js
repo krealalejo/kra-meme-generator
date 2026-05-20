@@ -11,7 +11,7 @@ export function triggerDownload(blob, name) {
   setTimeout(() => URL.revokeObjectURL(url), 5000)
 }
 
-export async function renderToBlob(image, texts, scale = 2) {
+export async function renderToBlob(image, layers, scale = 2) {
   await document.fonts.ready
   const img = await loadImg(image.src)
   const W = image.w * scale
@@ -23,10 +23,25 @@ export async function renderToBlob(image, texts, scale = 2) {
   ctx.imageSmoothingEnabled = true
   ctx.imageSmoothingQuality = 'high'
   ctx.drawImage(img, 0, 0, W, H)
-  for (const t of texts) {
-    drawText(ctx, t, W, H)
+  for (const layer of layers) {
+    if (layer.type === 'image') {
+      await drawImageLayer(ctx, layer, W, H)
+    } else {
+      drawText(ctx, layer, W, H)
+    }
   }
   return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
+}
+
+export async function drawImageLayer(ctx, layer, W, H) {
+  const img = await loadImg(layer.src)
+  const pxW = layer.w * W
+  const pxH = pxW / layer.aspectRatio
+  ctx.save()
+  ctx.translate(layer.x * W, layer.y * H)
+  ctx.rotate((layer.rotation * Math.PI) / 180)
+  ctx.drawImage(img, -pxW / 2, -pxH / 2, pxW, pxH)
+  ctx.restore()
 }
 
 export function loadImg(src) {
