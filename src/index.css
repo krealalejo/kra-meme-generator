@@ -215,6 +215,9 @@ input, select, textarea { font-family: inherit; }
   cursor: pointer;
   transition: background 0.15s ease;
   overflow: hidden;
+  padding: 0;
+  width: 100%;
+  text-align: left;
 }
 .drop.is-hover { background: var(--lime); color: #0E0E0E; }
 .drop-inner {
@@ -492,7 +495,7 @@ input, select, textarea { font-family: inherit; }
   border: 1px solid var(--line);
   opacity: 0.7;
 }
-.layer-row.is-active .layer-row-type { background: rgba(14,14,14,0.12); color: #0E0E0E; opacity: 1; }
+.layer-row.is-active .layer-row-type { background: rgba(255,255,255,0.3); color: #0E0E0E; opacity: 1; }
 .layer-row-text {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -721,6 +724,7 @@ input, select, textarea { font-family: inherit; }
   box-shadow: 10px 10px 0 var(--ink);
   opacity: 0;
   z-index: 3;
+  white-space: nowrap;
 }
 
 .toast {
@@ -928,11 +932,11 @@ input, select, textarea { font-family: inherit; }
 .app.is-mobile .fab:disabled { opacity: 0.5; }
 
 /* Generate overlay scaled */
-.app.is-mobile .gen-stamp { font-size: 24px; padding: 5px 11px 3px; letter-spacing: 1px; }
-.app.is-mobile .gen-bar { width: 200px; height: 12px; border-width: 2.5px; }
-.app.is-mobile .glitch { font-size: 44px; letter-spacing: 1px; }
-.app.is-mobile .gen-sub { font-size: 10px; }
-.app.is-mobile .done { font-size: 54px; padding: 8px 20px 6px; }
+.app.is-mobile .gen-stamp { font-size: clamp(16px, 5vw, 24px); padding: 4px 9px 3px; letter-spacing: 0.5px; max-width: 38vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.app.is-mobile .gen-bar { width: min(200px, 72vw); height: 12px; border-width: 2.5px; }
+.app.is-mobile .glitch { font-size: clamp(36px, 11vw, 48px); letter-spacing: 1px; }
+.app.is-mobile .gen-sub { font-size: 10px; max-width: 80vw; }
+.app.is-mobile .done { font-size: clamp(36px, 11vw, 54px); padding: 8px 20px 6px; white-space: nowrap; }
 
 /* Toast above FAB */
 .app.is-mobile .toast { bottom: 130px; font-size: 11px; }
