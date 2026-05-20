@@ -5,147 +5,15 @@ import DropZone from './components/DropZone'
 import Stage from './components/Stage'
 import SidePanel from './components/SidePanel'
 import GenOverlay from './components/GenOverlay'
-import { mkText } from './utils/text'
+import MobileSheetHeader from './components/MobileSheetHeader'
+import MobileFab from './components/MobileFab'
+import useIsMobile from './hooks/useIsMobile'
+import { mkText, mkImageLayer } from './utils/text'
 import { renderToBlob, triggerDownload } from './utils/canvas'
-
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(max-width: 820px)').matches
-  )
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 820px)')
-    const h = (e) => setIsMobile(e.matches)
-    mq.addEventListener('change', h)
-    return () => mq.removeEventListener('change', h)
-  }, [])
-  return isMobile
-}
-
-function MobileSheetHeader({ tab, setTab, open, setOpen, counts }) {
-  const tabs = [
-    { id: 'image', label: 'IMAGE', badge: counts.hasImage ? '•' : '' },
-    { id: 'layers', label: 'LAYERS', badge: counts.layers > 0 ? String(counts.layers) : '' },
-    { id: 'edit', label: 'EDIT', badge: counts.hasSel ? '•' : '' },
-  ]
-
-  const grabRef = useRef(null)
-  const isDragging = useRef(false)
-  const startY = useRef(0)
-  const startH = useRef(0)
-
-  useEffect(() => {
-    const handlePointerMove = (e) => {
-      if (!isDragging.current) return
-      const currentY = e.clientY
-      const deltaY = currentY - startY.current
-      const side = grabRef.current?.closest('.side')
-      if (side) {
-        let newH = startH.current - deltaY
-        if (newH < 52) newH = 52
-        side.style.maxHeight = `${newH}px`
-      }
-    }
-
-    const handlePointerUp = (e) => {
-      if (!isDragging.current) return
-      isDragging.current = false
-      const side = grabRef.current?.closest('.side')
-      if (side) {
-        side.style.transition = ''
-        side.style.maxHeight = ''
-      }
-      
-      const currentY = e.clientY
-      const deltaY = currentY - startY.current
-      
-      if (deltaY < -20) {
-        setOpen(true)
-      } else if (deltaY > 20) {
-        setOpen(false)
-      } else if (Math.abs(deltaY) < 5) {
-        setOpen((prev) => !prev)
-      }
-    }
-
-    const preventScroll = (e) => {
-      if (isDragging.current) e.preventDefault()
-    }
-
-    window.addEventListener('pointermove', handlePointerMove)
-    window.addEventListener('pointerup', handlePointerUp)
-    window.addEventListener('touchmove', preventScroll, { passive: false })
-
-    return () => {
-      window.removeEventListener('pointermove', handlePointerMove)
-      window.removeEventListener('pointerup', handlePointerUp)
-      window.removeEventListener('touchmove', preventScroll)
-    }
-  }, [setOpen])
-
-  const handlePointerDown = (e) => {
-    isDragging.current = true
-    startY.current = e.clientY
-    const side = grabRef.current?.closest('.side')
-    if (side) {
-      startH.current = side.getBoundingClientRect().height
-      side.style.transition = 'none'
-    }
-    if (grabRef.current) {
-      grabRef.current.setPointerCapture(e.pointerId)
-    }
-  }
-
-  return (
-    <div className="sheet-hdr">
-      <button 
-        ref={grabRef}
-        className="sheet-grab" 
-        onPointerDown={handlePointerDown} 
-        aria-label={open ? 'close panel' : 'open panel'}
-      >
-        <span className="grab-bar" />
-      </button>
-      <div className="sheet-tabs">
-        {tabs.map((t) => (
-          <button
-            key={t.id}
-            className={'sheet-tab ' + (tab === t.id && open ? 'is-on' : '')}
-            onClick={() => {
-              if (tab === t.id && open) {
-                setOpen(false)
-              } else {
-                setTab(t.id)
-                setOpen(true)
-              }
-            }}
-          >
-            <span>{t.label}</span>
-            {t.badge && <span className="sheet-tab-badge">{t.badge}</span>}
-          </button>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function MobileFab({ generating, onDownload }) {
-  return (
-    <div className="fab-wrap">
-      <button
-        className={'fab fab-dl ' + (generating ? 'is-busy' : '')}
-        onClick={onDownload}
-        disabled={generating}
-        aria-label="download meme"
-      >
-        {generating ? '…' : '↓ PNG'}
-      </button>
-    </div>
-  )
-}
 
 export default function App() {
   const [image, setImage] = useState(null)
-  const [texts, setTexts] = useState([])
+  const [layers, setLayers] = useState([])
   const [selectedId, setSelectedId] = useState(null)
   const [generating, setGenerating] = useState(false)
   const [toast, setToast] = useState(null)
@@ -160,13 +28,6 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    if (isMobile && selectedId) {
-      setMobileTab('edit')
-      setSheetOpen(true)
-    }
-  }, [selectedId, isMobile])
-
-  useEffect(() => {
     document.documentElement.dataset.theme = theme
     localStorage.setItem('mf-theme', theme)
   }, [theme])
@@ -175,9 +36,19 @@ export default function App() {
 
   const stageRef = useRef(null)
   const stageWrapRef = useRef(null)
+  const sideRef = useRef(null)
   const fileInputRef = useRef(null)
+  const overlayInputRef = useRef(null)
 
-  const selected = texts.find((t) => t.id === selectedId)
+  const selected = layers.find((l) => l.id === selectedId)
+
+  const selectLayer = useCallback((id) => {
+    setSelectedId(id)
+    if (isMobile && id) {
+      setMobileTab('edit')
+      setSheetOpen(true)
+    }
+  }, [isMobile])
 
   const loadImageSrc = useCallback((src) => {
     const img = new Image()
@@ -185,12 +56,21 @@ export default function App() {
     img.onload = () => {
       const swap = () => {
         setImage({ src, w: img.naturalWidth, h: img.naturalHeight })
-        setTexts([
+        setLayers([
           mkText({ text: 'TOP TEXT', y: 0.08 }),
           mkText({ text: 'BOTTOM TEXT', y: 0.86 }),
         ])
         setSelectedId(null)
         gsap.set(stageWrapRef.current, { clearProps: 'opacity,scale' })
+        if (sideRef.current) {
+          const w = Number(gsap.getProperty(sideRef.current, 'width'))
+          if (w === 0) {
+            gsap.fromTo(sideRef.current, { width: 0 }, {
+              width: 360, duration: 0.38, ease: 'power3.out',
+              onComplete: () => { if (sideRef.current) sideRef.current.style.overflowY = 'auto' },
+            })
+          }
+        }
       }
       if (stageWrapRef.current) {
         gsap.to(stageWrapRef.current, {
@@ -205,16 +85,42 @@ export default function App() {
     img.src = src
   }, [])
 
+  const addImageLayer = useCallback((src) => {
+    if (!image) { setToast('upload an image first'); return }
+    const img = new Image()
+    img.onload = () => {
+      const aspectRatio = img.naturalWidth / img.naturalHeight
+      const layer = mkImageLayer({ src, x: 0.5, y: 0.5, w: 0.35, aspectRatio })
+      setLayers((prev) => [...prev, layer])
+      selectLayer(layer.id)
+    }
+    img.src = src
+  }, [image, selectLayer])
+
+  const readFileAsDataURL = useCallback((file) => new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = (e) => resolve(e.target.result)
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  }), [])
+
   const handleFile = useCallback((file) => {
     if (!file) return
     if (!file.type.startsWith('image/')) {
       setToast("that's not an image, friend")
       return
     }
-    const reader = new FileReader()
-    reader.onload = (e) => loadImageSrc(e.target.result)
-    reader.readAsDataURL(file)
-  }, [loadImageSrc])
+    readFileAsDataURL(file).then(loadImageSrc)
+  }, [loadImageSrc, readFileAsDataURL])
+
+  const handleOverlayFile = useCallback((file) => {
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setToast("that's not an image, friend")
+      return
+    }
+    readFileAsDataURL(file).then(addImageLayer)
+  }, [addImageLayer, readFileAsDataURL])
 
   useEffect(() => {
     const onDragOver = (e) => e.preventDefault()
@@ -232,33 +138,81 @@ export default function App() {
   }, [handleFile])
 
   useEffect(() => {
+    const onPaste = (e) => {
+      const items = e.clipboardData?.items
+      if (!items) return
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile()
+          if (file) {
+            if (image) {
+              handleOverlayFile(file)
+            } else {
+              handleFile(file)
+            }
+          }
+          break
+        }
+      }
+    }
+    window.addEventListener('paste', onPaste)
+    return () => window.removeEventListener('paste', onPaste)
+  }, [image, handleFile, handleOverlayFile])
+
+  useEffect(() => {
     if (!toast) return
     const t = setTimeout(() => setToast(null), 2200)
     return () => clearTimeout(t)
   }, [toast])
 
-  const addText = () => {
+  const addText = useCallback(() => {
     if (!image) { setToast('upload an image first'); return }
     const t = mkText({ text: 'NEW TEXT', y: 0.45 + Math.random() * 0.1 })
-    setTexts((prev) => [...prev, t])
-    setSelectedId(t.id)
-  }
+    setLayers((prev) => [...prev, t])
+    selectLayer(t.id)
+  }, [image, selectLayer])
 
-  const updateText = (id, patch) =>
-    setTexts((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)))
+  const updateLayer = useCallback((id, patch) =>
+    setLayers((prev) => prev.map((l) => (l.id === id ? { ...l, ...patch } : l))), [])
 
-  const removeText = (id) => {
-    setTexts((prev) => prev.filter((t) => t.id !== id))
-    if (selectedId === id) setSelectedId(null)
-  }
+  const removeLayer = useCallback((id) => {
+    setLayers((prev) => prev.filter((l) => l.id !== id))
+    setSelectedId((sel) => sel === id ? null : sel)
+  }, [])
 
-  const duplicateText = (id) => {
-    const t = texts.find((x) => x.id === id)
-    if (!t) return
-    const copy = { ...t, id: crypto.randomUUID(), y: Math.min(0.95, t.y + 0.06) }
-    setTexts((prev) => [...prev, copy])
-    setSelectedId(copy.id)
-  }
+  const reorderLayers = useCallback((fromIdx, toIdx) => {
+    if (fromIdx === toIdx) return
+    setLayers((prev) => {
+      const next = [...prev]
+      const [moved] = next.splice(fromIdx, 1)
+      next.splice(toIdx, 0, moved)
+      return next
+    })
+  }, [])
+
+  const clearImage = useCallback(() => {
+    gsap.to(stageWrapRef.current, {
+      opacity: 0, scale: 0.97, duration: 0.15, ease: 'power2.in',
+      onComplete: () => {
+        gsap.set(stageWrapRef.current, { clearProps: 'opacity,scale' })
+        setImage(null); setLayers([]); setSelectedId(null)
+        if (sideRef.current) {
+          sideRef.current.style.overflowY = 'hidden'
+          gsap.to(sideRef.current, { width: 0, duration: 0.22, ease: 'power2.in' })
+        }
+      },
+    })
+  }, [])
+
+  const duplicateLayer = useCallback((id) => {
+    const newId = crypto.randomUUID()
+    setLayers((prev) => {
+      const l = prev.find((x) => x.id === id)
+      if (!l) return prev
+      return [...prev, { ...l, id: newId, y: Math.min(0.95, l.y + 0.06) }]
+    })
+    selectLayer(newId)
+  }, [selectLayer])
 
   const handleDownload = async () => {
     if (!image || generating) return
@@ -295,7 +249,7 @@ export default function App() {
     await new Promise((r) => setTimeout(r, 900))
 
     try {
-      const blob = await renderToBlob(image, texts)
+      const blob = await renderToBlob(image, layers)
       triggerDownload(blob, `meme-${Date.now()}.png`)
       gsap.to('#gen-overlay .done', {
         keyframes: [
@@ -340,44 +294,41 @@ export default function App() {
             <Stage
               ref={stageRef}
               image={image}
-              texts={texts}
+              layers={layers}
               selectedId={selectedId}
-              setSelectedId={setSelectedId}
-              updateText={updateText}
+              setSelectedId={selectLayer}
+              updateLayer={updateLayer}
             />
           )}
         </section>
 
-        <aside className="side">
+        <aside className="side" ref={sideRef}>
           {isMobile && (
             <MobileSheetHeader
               tab={mobileTab}
               setTab={setMobileTab}
               open={sheetOpen}
               setOpen={setSheetOpen}
-              counts={{ layers: texts.length, hasImage: !!image, hasSel: !!selected }}
+              counts={{ layers: layers.length, hasImage: !!image, hasSel: !!selected }}
             />
           )}
           <SidePanel
             image={image}
-            texts={texts}
+            layers={layers}
             selected={selected}
             selectedId={selectedId}
-            setSelectedId={setSelectedId}
+            setSelectedId={selectLayer}
             addText={addText}
-            updateText={updateText}
-            removeText={removeText}
-            duplicateText={duplicateText}
-            onReplaceImage={() => fileInputRef.current?.click()}
-            onClearImage={() => {
-              gsap.to(stageWrapRef.current, {
-                opacity: 0, scale: 0.97, duration: 0.15, ease: 'power2.in',
-                onComplete: () => {
-                  gsap.set(stageWrapRef.current, { clearProps: 'opacity,scale' })
-                  setImage(null); setTexts([]); setSelectedId(null)
-                },
-              })
+            addImageLayer={() => {
+              if (!image) { setToast('upload an image first'); return }
+              overlayInputRef.current?.click()
             }}
+            updateLayer={updateLayer}
+            removeLayer={removeLayer}
+            duplicateLayer={duplicateLayer}
+            reorderLayers={reorderLayers}
+            onReplaceImage={() => fileInputRef.current?.click()}
+            onClearImage={clearImage}
             isMobile={isMobile}
             mobileTab={mobileTab}
           />
@@ -393,7 +344,14 @@ export default function App() {
         type="file"
         accept="image/*"
         style={{ display: 'none' }}
-        onChange={(e) => handleFile(e.target.files?.[0])}
+        onChange={(e) => { handleFile(e.target.files?.[0]); e.target.value = '' }}
+      />
+      <input
+        ref={overlayInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={(e) => { handleOverlayFile(e.target.files?.[0]); e.target.value = '' }}
       />
 
       <GenOverlay />
