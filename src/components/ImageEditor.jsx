@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import PropTypes from 'prop-types'
 import CropModal from './CropModal'
 
 export default function ImageEditor({ layer, onUpdate, onDuplicate, onDelete }) {
@@ -39,4 +40,11 @@ export default function ImageEditor({ layer, onUpdate, onDuplicate, onDelete }) 
       )}
     </div>
   )
+}
+
+ImageEditor.propTypes = {
+  layer: PropTypes.shape({ rotation: PropTypes.number.isRequired }).isRequired,
+  onUpdate: PropTypes.func.isRequired,
+  onDuplicate: PropTypes.func.isRequired,
+  onDelete: PropTypes.func.isRequired,
 }

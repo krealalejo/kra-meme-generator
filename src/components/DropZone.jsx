@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
+import PropTypes from 'prop-types'
 import { SAMPLE_IMAGES } from '../utils/text'
 
 function FloatingStickers() {
@@ -11,9 +12,9 @@ function FloatingStickers() {
   ]
   return (
     <div className="floaters" aria-hidden="true">
-      {stickers.map((s, i) => (
+      {stickers.map((s) => (
         <div
-          key={i}
+          key={s.txt}
           className="floater impact-preview"
           style={{ left: s.x, top: s.y, background: s.c, color: s.c === 'var(--lime)' ? '#0E0E0E' : 'white', transform: `rotate(${s.r}deg)` }}
         >
@@ -51,10 +52,13 @@ export default function DropZone({ onPickFile, onSample }) {
     <div
       ref={dropRef}
       className={'drop ' + (hover ? 'is-hover' : '')}
+      role="button"
+      tabIndex={0}
       onDragEnter={() => setHover(true)}
       onDragLeave={() => setHover(false)}
       onDrop={() => setHover(false)}
       onClick={onPickFile}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onPickFile() }}
     >
       <div className="drop-inner">
         <h1 className="drop-title">
@@ -85,4 +89,9 @@ export default function DropZone({ onPickFile, onSample }) {
       <FloatingStickers />
     </div>
   )
+}
+
+DropZone.propTypes = {
+  onPickFile: PropTypes.func.isRequired,
+  onSample: PropTypes.func.isRequired,
 }

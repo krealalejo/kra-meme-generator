@@ -1,4 +1,13 @@
+import PropTypes from 'prop-types'
+
 export default function Header({ hasImage, onUpload, onDownload, generating, theme, onToggleTheme, isMobile }) {
+  let uploadLabel
+  if (isMobile) {
+    uploadLabel = hasImage ? 'NEW' : 'PICK'
+  } else {
+    uploadLabel = hasImage ? 'REPLACE' : 'UPLOAD'
+  }
+
   return (
     <header className="hdr">
       <div className="hdr-left">
@@ -12,7 +21,7 @@ export default function Header({ hasImage, onUpload, onDownload, generating, the
           {theme === 'dark' ? '☀' : '☾'}
         </button>
         <button className="btn btn-ghost" onClick={onUpload}>
-          <span>↑</span> {isMobile ? (hasImage ? 'NEW' : 'PICK') : (hasImage ? 'REPLACE' : 'UPLOAD')}
+          <span>↑</span> {uploadLabel}
         </button>
         {!isMobile && (
           <button
@@ -26,4 +35,14 @@ export default function Header({ hasImage, onUpload, onDownload, generating, the
       </div>
     </header>
   )
+}
+
+Header.propTypes = {
+  hasImage: PropTypes.bool.isRequired,
+  onUpload: PropTypes.func.isRequired,
+  onDownload: PropTypes.func.isRequired,
+  generating: PropTypes.bool.isRequired,
+  theme: PropTypes.string.isRequired,
+  onToggleTheme: PropTypes.func.isRequired,
+  isMobile: PropTypes.bool.isRequired,
 }

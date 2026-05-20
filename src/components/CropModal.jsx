@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import PropTypes from 'prop-types'
 
 export default function CropModal({ layer, onSave, onClose }) {
   const imgRef = useRef(null)
@@ -144,6 +145,13 @@ export default function CropModal({ layer, onSave, onClose }) {
     onSave(canvas.toDataURL('image/png'), w / h)
   }
 
+  function cropHint(m, isDrawing, validCrop) {
+    if (m === 'rect') return 'drag to select area'
+    if (isDrawing) return 'keep drawing · release to finish'
+    if (validCrop) return 'shape ready · hit save or draw again'
+    return 'draw around the area to crop'
+  }
+
   const hasValidCrop = mode === 'rect'
     ? cropRect && cropRect.w >= 5 && cropRect.h >= 5
     : lassoPoints && lassoPoints.length >= 3
@@ -151,7 +159,7 @@ export default function CropModal({ layer, onSave, onClose }) {
   const lassoStr = lassoPoints ? lassoPoints.map((p) => `${p.x},${p.y}`).join(' ') : ''
 
   return (
-    <div className="crop-backdrop" onPointerDown={(e) => { if (e.target === e.currentTarget) onClose() }}>
+    <div className="crop-backdrop" onPointerDown={(e) => { if (e.target === e.currentTarget) onClose() }} role="presentation">
       <div className="crop-modal">
         <div className="crop-modal-hdr">
           <div className="crop-modal-hdr-left">
@@ -205,16 +213,15 @@ export default function CropModal({ layer, onSave, onClose }) {
         </div>
 
         <div className="crop-hint mono">
-          {mode === 'rect'
-            ? 'drag to select area'
-            : drawing
-              ? 'keep drawing · release to finish'
-              : hasValidCrop
-                ? 'shape ready · hit save or draw again'
-                : 'draw around the area to crop'
-          }
+          {cropHint(mode, drawing, hasValidCrop)}
         </div>
       </div>
     </div>
   )
+}
+
+CropModal.propTypes = {
+  layer: PropTypes.shape({ src: PropTypes.string.isRequired }).isRequired,
+  onSave: PropTypes.func.isRequired,
+  onClose: PropTypes.func.isRequired,
 }

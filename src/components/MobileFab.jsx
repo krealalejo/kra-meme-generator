@@ -1,3 +1,5 @@
+import PropTypes from 'prop-types'
+
 export default function MobileFab({ generating, onDownload }) {
   return (
     <div className="fab-wrap">
@@ -11,4 +13,9 @@ export default function MobileFab({ generating, onDownload }) {
       </button>
     </div>
   )
+}
+
+MobileFab.propTypes = {
+  generating: PropTypes.bool.isRequired,
+  onDownload: PropTypes.func.isRequired,
 }

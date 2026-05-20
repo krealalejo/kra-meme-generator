@@ -1,10 +1,11 @@
 import { useRef, useEffect } from 'react'
+import PropTypes from 'prop-types'
 
 export default function MobileSheetHeader({ tab, setTab, open, setOpen, counts }) {
   const tabs = [
-    { id: 'image', label: 'IMAGE', badge: counts.hasImage ? '•' : '' },
+    { id: 'image', label: 'IMAGE' },
     { id: 'layers', label: 'LAYERS', badge: counts.layers > 0 ? String(counts.layers) : '' },
-    { id: 'edit', label: 'EDIT', badge: counts.hasSel ? '•' : '' },
+    { id: 'edit', label: 'EDIT' },
   ]
 
   const grabRef = useRef(null)
@@ -50,14 +51,14 @@ export default function MobileSheetHeader({ tab, setTab, open, setOpen, counts }
       if (isDragging.current) e.preventDefault()
     }
 
-    window.addEventListener('pointermove', handlePointerMove)
-    window.addEventListener('pointerup', handlePointerUp)
-    window.addEventListener('touchmove', preventScroll, { passive: false })
+    globalThis.addEventListener('pointermove', handlePointerMove)
+    globalThis.addEventListener('pointerup', handlePointerUp)
+    globalThis.addEventListener('touchmove', preventScroll, { passive: false })
 
     return () => {
-      window.removeEventListener('pointermove', handlePointerMove)
-      window.removeEventListener('pointerup', handlePointerUp)
-      window.removeEventListener('touchmove', preventScroll)
+      globalThis.removeEventListener('pointermove', handlePointerMove)
+      globalThis.removeEventListener('pointerup', handlePointerUp)
+      globalThis.removeEventListener('touchmove', preventScroll)
     }
   }, [setOpen])
 
@@ -105,4 +106,16 @@ export default function MobileSheetHeader({ tab, setTab, open, setOpen, counts }
       </div>
     </div>
   )
+}
+
+MobileSheetHeader.propTypes = {
+  tab: PropTypes.string.isRequired,
+  setTab: PropTypes.func.isRequired,
+  open: PropTypes.bool.isRequired,
+  setOpen: PropTypes.func.isRequired,
+  counts: PropTypes.shape({
+    hasImage: PropTypes.bool.isRequired,
+    layers: PropTypes.number.isRequired,
+    hasSel: PropTypes.bool.isRequired,
+  }).isRequired,
 }

@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import PropTypes from 'prop-types'
 import { clamp } from '../utils/text'
 import { startDrag } from '../hooks/useDrag'
 
@@ -60,5 +61,21 @@ const ImageLayer = memo(function ImageLayer({ layer, box, selected, onSelect, on
     </div>
   )
 })
+
+ImageLayer.propTypes = {
+  layer: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    src: PropTypes.string.isRequired,
+    x: PropTypes.number.isRequired,
+    y: PropTypes.number.isRequired,
+    w: PropTypes.number.isRequired,
+    aspectRatio: PropTypes.number.isRequired,
+    rotation: PropTypes.number.isRequired,
+  }).isRequired,
+  box: PropTypes.shape({ w: PropTypes.number.isRequired, h: PropTypes.number.isRequired }).isRequired,
+  selected: PropTypes.bool.isRequired,
+  onSelect: PropTypes.func.isRequired,
+  onUpdate: PropTypes.func.isRequired,
+}
 
 export default ImageLayer

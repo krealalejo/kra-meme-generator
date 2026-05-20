@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import PropTypes from 'prop-types'
 import { gsap } from 'gsap'
 import TextEditor from './TextEditor'
 import ImageEditor from './ImageEditor'
@@ -27,7 +28,7 @@ export default function SidePanel({
   const dragSrc = useRef(null)
   const [dragOver, setDragOver] = useState(null)
 
-  const show = (key) => !isMobile || mobileTab === key
+  const show = (key) => isMobile ? mobileTab === key : true
   return (
     <div className="panel">
       {show('image') && (
@@ -106,6 +107,8 @@ export default function SidePanel({
                   </span>
                   <span
                     className="layer-row-x"
+                    role="button"
+                    tabIndex={0}
                     onClick={(e) => {
                       e.stopPropagation()
                       const row = e.currentTarget.closest('.layer-row')
@@ -114,6 +117,12 @@ export default function SidePanel({
                         duration: 0.18, ease: 'power2.in',
                         onComplete: () => removeLayer(l.id),
                       })
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.stopPropagation()
+                        removeLayer(l.id)
+                      }
                     }}
                     title="delete"
                   >
@@ -158,4 +167,29 @@ export default function SidePanel({
       ))}
     </div>
   )
+}
+
+PanelBlock.propTypes = {
+  title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string,
+  action: PropTypes.node,
+  children: PropTypes.node.isRequired,
+}
+
+SidePanel.propTypes = {
+  image: PropTypes.shape({ src: PropTypes.string.isRequired, w: PropTypes.number.isRequired, h: PropTypes.number.isRequired }),
+  layers: PropTypes.arrayOf(PropTypes.object).isRequired,
+  selected: PropTypes.object,
+  selectedId: PropTypes.string,
+  setSelectedId: PropTypes.func.isRequired,
+  addText: PropTypes.func.isRequired,
+  addImageLayer: PropTypes.func.isRequired,
+  updateLayer: PropTypes.func.isRequired,
+  removeLayer: PropTypes.func.isRequired,
+  duplicateLayer: PropTypes.func.isRequired,
+  reorderLayers: PropTypes.func.isRequired,
+  onReplaceImage: PropTypes.func.isRequired,
+  onClearImage: PropTypes.func.isRequired,
+  isMobile: PropTypes.bool.isRequired,
+  mobileTab: PropTypes.string.isRequired,
 }

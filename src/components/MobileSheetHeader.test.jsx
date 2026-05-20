@@ -59,15 +59,14 @@ describe('MobileSheetHeader', () => {
     expect(screen.getByText('3')).toBeInTheDocument()
   })
 
-  it('shows dot badge on IMAGE when hasImage', () => {
+  it('no dot badge on IMAGE when hasImage', () => {
     render(<MobileSheetHeader {...mkProps({ counts: { hasImage: true, layers: 0, hasSel: false } })} />)
-    const imageBtns = screen.getAllByText('•')
-    expect(imageBtns.length).toBeGreaterThan(0)
+    expect(screen.queryByText('•')).not.toBeInTheDocument()
   })
 
-  it('shows dot badge on EDIT when hasSel', () => {
+  it('no dot badge on EDIT when hasSel', () => {
     render(<MobileSheetHeader {...mkProps({ counts: { hasImage: false, layers: 0, hasSel: true } })} />)
-    expect(screen.getAllByText('•').length).toBeGreaterThan(0)
+    expect(screen.queryByText('•')).not.toBeInTheDocument()
   })
 
   it('grab bar aria-label changes with open state', () => {
