@@ -1,6 +1,6 @@
-import pepeMage from '../assets/pepe-mage.png'
-import pepeSad from '../assets/pepe-sad.png'
-import pepe from '../assets/pepe.png'
+import pepeMage from '../assets/pepe-mage.webp'
+import pepeSad from '../assets/pepe-sad.webp'
+import pepe from '../assets/pepe.webp'
 export function clamp(v, a, b) {
   return Math.max(a, Math.min(b, v))
 }
