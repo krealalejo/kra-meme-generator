@@ -20,7 +20,7 @@ export default function Header({ hasImage, onUpload, onDownload, generating, the
             onClick={onDownload}
             disabled={!hasImage || generating}
           >
-            {generating ? 'GENERATING…' : 'DOWNLOAD .PNG ↓'}
+            {generating ? 'GENERATING…' : 'DOWNLOAD ↓'}
           </button>
         )}
       </div>

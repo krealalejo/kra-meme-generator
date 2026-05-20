@@ -1,47 +1,26 @@
-import { useRef } from 'react'
+import { memo } from 'react'
 import { FONTS } from '../constants'
 import { clamp } from '../utils/text'
+import { startDrag } from '../hooks/useDrag'
 
-export default function TextLayer({ t, box, selected, onSelect, onUpdate }) {
-  const ref = useRef(null)
-
+const TextLayer = memo(function TextLayer({ t, box, selected, onSelect, onUpdate }) {
   const onPointerDown = (e) => {
     e.stopPropagation()
-    onSelect()
+    onSelect(t.id)
     if (e.target.dataset.role === 'handle') return
-    const startX = e.clientX
-    const startY = e.clientY
-    const startTX = t.x
-    const startTY = t.y
-    const move = (ev) => {
-      const dx = (ev.clientX - startX) / box.w
-      const dy = (ev.clientY - startY) / box.h
-      onUpdate({ x: clamp(startTX + dx, 0, 1), y: clamp(startTY + dy, 0, 1) })
-    }
-    const up = () => {
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', up)
-    }
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', up)
+    const { x, y } = t
+    startDrag(e, (dx, dy) => onUpdate(t.id, {
+      x: clamp(x + dx / box.w, 0, 1),
+      y: clamp(y + dy / box.h, 0, 1),
+    }))
   }
 
   const onResizeDown = (e) => {
     e.stopPropagation()
     e.preventDefault()
-    onSelect()
-    const startY = e.clientY
-    const startSize = t.size
-    const move = (ev) => {
-      const dy = (ev.clientY - startY) / box.h
-      onUpdate({ size: clamp(startSize + dy, 0.02, 0.4) })
-    }
-    const up = () => {
-      window.removeEventListener('pointermove', move)
-      window.removeEventListener('pointerup', up)
-    }
-    window.addEventListener('pointermove', move)
-    window.addEventListener('pointerup', up)
+    onSelect(t.id)
+    const { size } = t
+    startDrag(e, (_, dy) => onUpdate(t.id, { size: clamp(size + dy / box.h, 0.02, 0.4) }))
   }
 
   const fontDef = FONTS.find((f) => f.id === t.font) || FONTS[0]
@@ -65,14 +44,13 @@ export default function TextLayer({ t, box, selected, onSelect, onUpdate }) {
 
   return (
     <div
-      ref={ref}
       className={'layer ' + (selected ? 'is-selected' : '')}
       style={style}
       onPointerDown={onPointerDown}
       onDoubleClick={(e) => {
         e.stopPropagation()
         const val = prompt('edit text', t.text)
-        if (val !== null) onUpdate({ text: val })
+        if (val !== null) onUpdate(t.id, { text: val })
       }}
     >
       <span className="layer-text">{t.text || '…'}</span>
@@ -90,4 +68,6 @@ export default function TextLayer({ t, box, selected, onSelect, onUpdate }) {
       )}
     </div>
   )
-}
+})
+
+export default TextLayer

@@ -1,5 +1,7 @@
+import { useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import TextEditor from './TextEditor'
+import ImageEditor from './ImageEditor'
 
 function PanelBlock({ title, subtitle, action, children }) {
   return (
@@ -17,11 +19,14 @@ function PanelBlock({ title, subtitle, action, children }) {
 }
 
 export default function SidePanel({
-  image, texts, selected, selectedId, setSelectedId,
-  addText, updateText, removeText, duplicateText,
+  image, layers, selected, selectedId, setSelectedId,
+  addText, addImageLayer, updateLayer, removeLayer, duplicateLayer, reorderLayers,
   onReplaceImage, onClearImage,
   isMobile, mobileTab,
 }) {
+  const dragSrc = useRef(null)
+  const [dragOver, setDragOver] = useState(null)
+
   const show = (key) => !isMobile || mobileTab === key
   return (
     <div className="panel">
@@ -48,26 +53,57 @@ export default function SidePanel({
 
       {show('layers') && (
         <PanelBlock
-          title="TEXT LAYERS"
-          subtitle={`${texts.length} ${texts.length === 1 ? 'item' : 'items'}`}
+          title="LAYERS"
+          subtitle={`${layers.length} ${layers.length === 1 ? 'item' : 'items'}`}
           action={
-            <button className="add-btn" onClick={addText}>
-              <span>+</span> ADD TEXT
-            </button>
+            <div className="add-btns">
+              <button className="add-btn" onClick={addText}>
+                <span>T</span> TEXT
+              </button>
+              <button className="add-btn" onClick={addImageLayer}>
+                <span>⊞</span> IMG
+              </button>
+            </div>
           }
         >
-          {texts.length === 0 ? (
-            <div className="empty mono">no text yet. hit + to add one</div>
+          {layers.length === 0 ? (
+            <div className="empty mono">no layers yet. hit + to add one</div>
           ) : (
             <div className="layer-list">
-              {texts.map((t, idx) => (
+              {layers.map((l, idx) => (
                 <button
-                  key={t.id}
-                  className={'layer-row ' + (t.id === selectedId ? 'is-active' : '')}
-                  onClick={() => setSelectedId(t.id)}
+                  key={l.id}
+                  draggable
+                  className={[
+                    'layer-row',
+                    l.id === selectedId ? 'is-active' : '',
+                    dragOver === idx ? 'is-drag-over' : '',
+                  ].filter(Boolean).join(' ')}
+                  onClick={() => setSelectedId(l.id)}
+                  onDragStart={(e) => {
+                    dragSrc.current = idx
+                    e.dataTransfer.effectAllowed = 'move'
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault()
+                    e.dataTransfer.dropEffect = 'move'
+                    setDragOver(idx)
+                  }}
+                  onDragLeave={() => setDragOver(null)}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    setDragOver(null)
+                    if (dragSrc.current !== null) reorderLayers(dragSrc.current, idx)
+                    dragSrc.current = null
+                  }}
+                  onDragEnd={() => { dragSrc.current = null; setDragOver(null) }}
                 >
+                  <span className="layer-row-drag" aria-hidden>⠿</span>
                   <span className="layer-row-idx mono">{String(idx + 1).padStart(2, '0')}</span>
-                  <span className="layer-row-text">{t.text || '(empty)'}</span>
+                  <span className="layer-row-type mono">{l.type === 'image' ? 'IMG' : 'TXT'}</span>
+                  <span className="layer-row-text">
+                    {l.type === 'image' ? '[image]' : (l.text || '(empty)')}
+                  </span>
                   <span
                     className="layer-row-x"
                     onClick={(e) => {
@@ -76,7 +112,7 @@ export default function SidePanel({
                       gsap.to(row, {
                         x: -16, opacity: 0, height: 0, paddingTop: 0, paddingBottom: 0,
                         duration: 0.18, ease: 'power2.in',
-                        onComplete: () => removeText(t.id),
+                        onComplete: () => removeLayer(l.id),
                       })
                     }}
                     title="delete"
@@ -93,21 +129,30 @@ export default function SidePanel({
       {show('edit') && (selected ? (
         <PanelBlock
           title="EDIT"
-          subtitle={`layer ${texts.findIndex((t) => t.id === selected.id) + 1}`}
+          subtitle={`layer ${layers.findIndex((l) => l.id === selected.id) + 1}`}
         >
-          <TextEditor
-            t={selected}
-            onUpdate={(patch) => updateText(selected.id, patch)}
-            onDuplicate={() => duplicateText(selected.id)}
-            onDelete={() => removeText(selected.id)}
-          />
+          {selected.type === 'image' ? (
+            <ImageEditor
+              layer={selected}
+              onUpdate={(patch) => updateLayer(selected.id, patch)}
+              onDuplicate={() => duplicateLayer(selected.id)}
+              onDelete={() => removeLayer(selected.id)}
+            />
+          ) : (
+            <TextEditor
+              t={selected}
+              onUpdate={(patch) => updateLayer(selected.id, patch)}
+              onDuplicate={() => duplicateLayer(selected.id)}
+              onDelete={() => removeLayer(selected.id)}
+            />
+          )}
         </PanelBlock>
       ) : (
         <PanelBlock title="EDIT" subtitle="nothing selected">
           <div className="empty mono">
             tap a layer above or on the canvas to edit
             <br /><br />
-            <span style={{ opacity: 0.7 }}>tip: double-tap a layer to retype it fast</span>
+            <span style={{ opacity: 0.7 }}>tip: ctrl+v to paste an image as overlay</span>
           </div>
         </PanelBlock>
       ))}

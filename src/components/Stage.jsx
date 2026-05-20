@@ -1,8 +1,9 @@
-import { forwardRef, useRef, useState, useEffect } from 'react'
+import { forwardRef, memo, useRef, useState, useEffect, useCallback } from 'react'
 import { gsap } from 'gsap'
 import TextLayer from './TextLayer'
+import ImageLayer from './ImageLayer'
 
-function StageMeta({ image, box, count }) {
+const StageMeta = memo(function StageMeta({ image, box, count }) {
   return (
     <div className="stage-meta mono">
       <span>{image.w}×{image.h}px</span>
@@ -12,14 +13,17 @@ function StageMeta({ image, box, count }) {
       <span>scale {box.w ? Math.round((box.w / image.w) * 100) : 0}%</span>
     </div>
   )
-}
+})
 
 const Stage = forwardRef(function Stage(
-  { image, texts, selectedId, setSelectedId, updateText },
+  { image, layers, selectedId, setSelectedId, updateLayer },
   ref
 ) {
   const innerRef = useRef(null)
   const [box, setBox] = useState({ w: 0, h: 0 })
+
+  const handleSelect = useCallback((id) => setSelectedId(id), [setSelectedId])
+  const handleUpdate = useCallback((id, patch) => updateLayer(id, patch), [updateLayer])
 
   useEffect(() => {
     if (innerRef.current) {
@@ -57,18 +61,29 @@ const Stage = forwardRef(function Stage(
         onMouseDown={(e) => { if (e.target.classList.contains('stage')) setSelectedId(null) }}
       >
         <img className="stage-img" src={image.src} alt="" draggable={false} />
-        {texts.map((t) => (
-          <TextLayer
-            key={t.id}
-            t={t}
-            box={box}
-            selected={t.id === selectedId}
-            onSelect={() => setSelectedId(t.id)}
-            onUpdate={(patch) => updateText(t.id, patch)}
-          />
-        ))}
+        {layers.map((layer) =>
+          layer.type === 'image' ? (
+            <ImageLayer
+              key={layer.id}
+              layer={layer}
+              box={box}
+              selected={layer.id === selectedId}
+              onSelect={handleSelect}
+              onUpdate={handleUpdate}
+            />
+          ) : (
+            <TextLayer
+              key={layer.id}
+              t={layer}
+              box={box}
+              selected={layer.id === selectedId}
+              onSelect={handleSelect}
+              onUpdate={handleUpdate}
+            />
+          )
+        )}
       </div>
-      <StageMeta image={image} box={box} count={texts.length} />
+      <StageMeta image={image} box={box} count={layers.length} />
     </div>
   )
 })
