@@ -240,6 +240,7 @@ describe('App', () => {
   })
 
   it('shows toast when renderToBlob throws', async () => {
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
     renderToBlob.mockRejectedValue(new Error('canvas error'))
 
     render(<App />)
@@ -252,6 +253,7 @@ describe('App', () => {
     vi.useRealTimers()
 
     expect(screen.getByText(/export failed/i)).toBeInTheDocument()
+    spy.mockRestore()
   })
 
   it('download button disabled when no image', () => {
