@@ -33,9 +33,7 @@ export default function SidePanel({
     <div className="panel">
       {show('image') && (
         <PanelBlock title="IMAGE" subtitle="source">
-          {!image ? (
-            <div className="empty mono">no image loaded</div>
-          ) : (
+          {image ? (
             <div className="img-meta">
               <div className="img-thumb">
                 <img src={image.src} alt="" />
@@ -48,6 +46,8 @@ export default function SidePanel({
                 </div>
               </div>
             </div>
+          ) : (
+            <div className="empty mono">no image loaded</div>
           )}
         </PanelBlock>
       )}
@@ -72,8 +72,10 @@ export default function SidePanel({
           ) : (
             <div className="layer-list">
               {layers.map((l, idx) => (
-                <button
+                <div
                   key={l.id}
+                  role="button"
+                  tabIndex={0}
                   draggable
                   className={[
                     'layer-row',
@@ -81,6 +83,7 @@ export default function SidePanel({
                     dragOver === idx ? 'is-drag-over' : '',
                   ].filter(Boolean).join(' ')}
                   onClick={() => setSelectedId(l.id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedId(l.id) }}
                   onDragStart={(e) => {
                     dragSrc.current = idx
                     e.dataTransfer.effectAllowed = 'move'
@@ -98,6 +101,7 @@ export default function SidePanel({
                     dragSrc.current = null
                   }}
                   onDragEnd={() => { dragSrc.current = null; setDragOver(null) }}
+                  aria-selected={l.id === selectedId}
                 >
                   <span className="layer-row-drag" aria-hidden>⠿</span>
                   <span className="layer-row-idx mono">{String(idx + 1).padStart(2, '0')}</span>
@@ -105,10 +109,9 @@ export default function SidePanel({
                   <span className="layer-row-text">
                     {l.type === 'image' ? '[image]' : (l.text || '(empty)')}
                   </span>
-                  <span
+                  <button
+                    type="button"
                     className="layer-row-x"
-                    role="button"
-                    tabIndex={0}
                     onClick={(e) => {
                       e.stopPropagation()
                       const row = e.currentTarget.closest('.layer-row')
@@ -118,17 +121,11 @@ export default function SidePanel({
                         onComplete: () => removeLayer(l.id),
                       })
                     }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.stopPropagation()
-                        removeLayer(l.id)
-                      }
-                    }}
                     title="delete"
                   >
                     ×
-                  </span>
-                </button>
+                  </button>
+                </div>
               ))}
             </div>
           )}

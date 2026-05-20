@@ -82,7 +82,7 @@ describe('ImageLayer', () => {
   })
 
   it('sets position style from layer x/y', () => {
-    const layer = mkImageLayer({ x: 0.25, y: 0.75, w: 0.2, aspectRatio: 1, rotation: 0 })
+    const layer = mkImageLayer({ src: 'test.png', x: 0.25, y: 0.75, w: 0.2, aspectRatio: 1, rotation: 0 })
     render(<ImageLayer {...mkProps({ layer })} />)
     const el = document.querySelector('.layer-img')
     expect(el.style.left).toBe('25%')
@@ -90,7 +90,7 @@ describe('ImageLayer', () => {
   })
 
   it('applies rotation via transform', () => {
-    const layer = mkImageLayer({ rotation: 45 })
+    const layer = mkImageLayer({ src: 'test.png', rotation: 45 })
     render(<ImageLayer {...mkProps({ layer })} />)
     expect(document.querySelector('.layer-img').style.transform).toContain('rotate(45deg)')
   })

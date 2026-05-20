@@ -50,15 +50,15 @@ export default function DropZone({ onPickFile, onSample }) {
 
   return (
     <div
-      ref={dropRef}
-      className={'drop ' + (hover ? 'is-hover' : '')}
       role="button"
       tabIndex={0}
+      ref={dropRef}
+      className={'drop ' + (hover ? 'is-hover' : '')}
       onDragEnter={() => setHover(true)}
       onDragLeave={() => setHover(false)}
       onDrop={() => setHover(false)}
       onClick={onPickFile}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onPickFile() }}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPickFile() } }}
     >
       <div className="drop-inner">
         <h1 className="drop-title">
