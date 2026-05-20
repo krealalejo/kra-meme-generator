@@ -7,7 +7,7 @@ const defaults = { hasImage: false, onUpload: vi.fn(), onDownload: vi.fn(), gene
 describe('Header', () => {
   it('renders MEMEFORGE logo', () => {
     render(<Header {...defaults} />)
-    expect(screen.getByText('MEMEFORGE')).toBeInTheDocument()
+    expect(screen.getByText((_, el) => el?.className === 'logo' && el?.textContent === 'MEMEFORGE')).toBeInTheDocument()
   })
 
   it('shows UPLOAD when no image', () => {
