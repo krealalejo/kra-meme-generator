@@ -783,6 +783,9 @@ input, select, textarea { font-family: inherit; }
 }
 
 /* Bottom sheet */
+.app.is-mobile.no-image .side {
+  display: none;
+}
 .app.is-mobile .side {
   flex-shrink: 0;
   position: relative;

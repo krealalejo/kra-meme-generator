@@ -17,7 +17,7 @@ export default function App() {
   const [selectedId, setSelectedId] = useState(null)
   const [generating, setGenerating] = useState(false)
   const [toast, setToast] = useState(null)
-  const [theme, setTheme] = useState(() => localStorage.getItem('mf-theme') || 'light')
+  const [theme, setTheme] = useState(() => localStorage.getItem('mf-theme') || (globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
   const [mobileTab, setMobileTab] = useState('layers')
   const [sheetOpen, setSheetOpen] = useState(false)
   const isMobile = useIsMobile()
@@ -50,6 +50,16 @@ export default function App() {
     }
   }, [isMobile])
 
+  const animateSidePanel = useCallback(() => {
+    if (!sideRef.current) return
+    const w = Number(gsap.getProperty(sideRef.current, 'width'))
+    if (w !== 0) return
+    gsap.fromTo(sideRef.current, { width: 0 }, {
+      width: 360, duration: 0.38, ease: 'power3.out',
+      onComplete: () => { if (sideRef.current) sideRef.current.style.overflowY = 'auto' },
+    })
+  }, [])
+
   const loadImageSrc = useCallback((src) => {
     const img = new Image()
     img.crossOrigin = 'anonymous'
@@ -62,15 +72,7 @@ export default function App() {
         ])
         setSelectedId(null)
         gsap.set(stageWrapRef.current, { clearProps: 'opacity,scale' })
-        if (sideRef.current) {
-          const w = Number(gsap.getProperty(sideRef.current, 'width'))
-          if (w === 0) {
-            gsap.fromTo(sideRef.current, { width: 0 }, {
-              width: 360, duration: 0.38, ease: 'power3.out',
-              onComplete: () => { if (sideRef.current) sideRef.current.style.overflowY = 'auto' },
-            })
-          }
-        }
+        animateSidePanel()
       }
       if (stageWrapRef.current) {
         gsap.to(stageWrapRef.current, {
@@ -83,7 +85,7 @@ export default function App() {
     }
     img.onerror = () => setToast("couldn't load that image")
     img.src = src
-  }, [])
+  }, [animateSidePanel])
 
   const addImageLayer = useCallback((src) => {
     if (!image) { setToast('upload an image first'); return }
@@ -129,11 +131,11 @@ export default function App() {
       const file = e.dataTransfer.files?.[0]
       if (file) handleFile(file)
     }
-    window.addEventListener('dragover', onDragOver)
-    window.addEventListener('drop', onDrop)
+    globalThis.addEventListener('dragover', onDragOver)
+    globalThis.addEventListener('drop', onDrop)
     return () => {
-      window.removeEventListener('dragover', onDragOver)
-      window.removeEventListener('drop', onDrop)
+      globalThis.removeEventListener('dragover', onDragOver)
+      globalThis.removeEventListener('drop', onDrop)
     }
   }, [handleFile])
 
@@ -155,8 +157,8 @@ export default function App() {
         }
       }
     }
-    window.addEventListener('paste', onPaste)
-    return () => window.removeEventListener('paste', onPaste)
+    globalThis.addEventListener('paste', onPaste)
+    return () => globalThis.removeEventListener('paste', onPaste)
   }, [image, handleFile, handleOverlayFile])
 
   useEffect(() => {
@@ -269,7 +271,7 @@ export default function App() {
     setGenerating(false)
   }
 
-  const appClass = ['app', isMobile && 'is-mobile', isMobile && sheetOpen && 'sheet-open'].filter(Boolean).join(' ')
+  const appClass = ['app', isMobile && 'is-mobile', isMobile && sheetOpen && 'sheet-open', isMobile && !image && 'no-image'].filter(Boolean).join(' ')
 
   return (
     <div className={appClass}>
@@ -285,12 +287,7 @@ export default function App() {
 
       <main className="main">
         <section className="stage-wrap" ref={stageWrapRef}>
-          {!image ? (
-            <DropZone
-              onPickFile={() => fileInputRef.current?.click()}
-              onSample={(src) => loadImageSrc(src)}
-            />
-          ) : (
+          {image ? (
             <Stage
               ref={stageRef}
               image={image}
@@ -298,6 +295,11 @@ export default function App() {
               selectedId={selectedId}
               setSelectedId={selectLayer}
               updateLayer={updateLayer}
+            />
+          ) : (
+            <DropZone
+              onPickFile={() => fileInputRef.current?.click()}
+              onSample={(src) => loadImageSrc(src)}
             />
           )}
         </section>

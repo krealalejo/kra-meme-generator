@@ -487,6 +487,27 @@ describe('App', () => {
     })
   })
 
+  it('mobile without image has no-image class on app', () => {
+    useIsMobile.mockReturnValue(true)
+    render(<App />)
+    expect(document.querySelector('.app')).toHaveClass('no-image')
+  })
+
+  it('mobile with image does not have no-image class', async () => {
+    useIsMobile.mockReturnValue(true)
+    render(<App />)
+    fireEvent.click(screen.getByText('PEPE MAGE'))
+    await waitFor(() => {
+      expect(document.querySelector('.app')).not.toHaveClass('no-image')
+    })
+  })
+
+  it('desktop without image does not have no-image class', () => {
+    useIsMobile.mockReturnValue(false)
+    render(<App />)
+    expect(document.querySelector('.app')).not.toHaveClass('no-image')
+  })
+
   it('skips side panel fromTo animation when panel already open', async () => {
     gsap.getProperty.mockReturnValueOnce(360)
 
