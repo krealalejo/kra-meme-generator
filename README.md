@@ -1,6 +1,6 @@
 # kra-memes
 
-MEMEFORGE is a sleek, highly interactive single-page web application for creating and customizing memes. It provides real-time canvas overlays, drag-and-drop file uploads, inline double-click editing, and an offscreen canvas rendering system that exports high-resolution memes. The UI implements a bold, colorful Neobrutalism design system that is fully responsive, dark-mode ready, and optimized for mobile devices.
+<a href="https://kra-memeforge.vercel.app/" target="_blank" rel="noopener noreferrer">MEMEFORGE</a> is a sleek, highly interactive single-page web application for creating and customizing memes. It provides real-time canvas overlays, drag-and-drop file uploads, inline double-click editing, and an offscreen canvas rendering system that exports high-resolution memes. The UI implements a bold, colorful Neobrutalism design system that is fully responsive, dark-mode ready, and optimized for mobile devices.
 
 **Stack:** React **19**, Vite **6**, GSAP **3**, Vitest **4**, Vanilla CSS.
 
