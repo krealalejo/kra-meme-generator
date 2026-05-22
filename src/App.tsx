@@ -178,11 +178,9 @@ export default function App() {
   }, [image, selectLayer])
 
   const updateLayer = useCallback((id: string, patch: LayerPatch) =>
-    setLayers((prev) => prev.map((l): Layer => {
-      if (l.id !== id) return l
-      if (l.type === 'text') return { ...l, ...patch }
-      return { ...l, ...patch }
-    })), [])
+    setLayers((prev) => prev.map((l): Layer =>
+      l.id !== id ? l : { ...l, ...patch }
+    )), [])
 
   const removeLayer = useCallback((id: string) => {
     setLayers((prev) => prev.filter((l) => l.id !== id))
@@ -218,9 +216,7 @@ export default function App() {
     setLayers((prev) => {
       const l = prev.find((x) => x.id === id)
       if (!l) return prev
-      const dup = l.type === 'text'
-        ? { ...l, id: newId, y: Math.min(0.95, l.y + 0.06) }
-        : { ...l, id: newId, y: Math.min(0.95, l.y + 0.06) }
+      const dup = { ...l, id: newId, y: Math.min(0.95, l.y + 0.06) }
       return [...prev, dup]
     })
     selectLayer(newId)
