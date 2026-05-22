@@ -1,10 +1,17 @@
 import { useRef, useState } from 'react'
-import PropTypes from 'prop-types'
 import { gsap } from 'gsap'
 import TextEditor from './TextEditor'
 import ImageEditor from './ImageEditor'
+import type { MemeImage, Layer, LayerPatch } from '../types'
 
-function PanelBlock({ title, subtitle, action, children }) {
+interface PanelBlockProps {
+  title: string
+  subtitle?: string
+  action?: React.ReactNode
+  children: React.ReactNode
+}
+
+function PanelBlock({ title, subtitle, action, children }: PanelBlockProps) {
   return (
     <section className="block">
       <header className="block-hdr">
@@ -19,16 +26,34 @@ function PanelBlock({ title, subtitle, action, children }) {
   )
 }
 
+interface SidePanelProps {
+  image: MemeImage | null
+  layers: Layer[]
+  selected: Layer | undefined
+  selectedId: string | null
+  setSelectedId: (id: string | null) => void
+  addText: () => void
+  addImageLayer: () => void
+  updateLayer: (id: string, patch: LayerPatch) => void
+  removeLayer: (id: string) => void
+  duplicateLayer: (id: string) => void
+  reorderLayers: (from: number, to: number) => void
+  onReplaceImage: () => void
+  onClearImage: () => void
+  isMobile: boolean
+  mobileTab: string
+}
+
 export default function SidePanel({
   image, layers, selected, selectedId, setSelectedId,
   addText, addImageLayer, updateLayer, removeLayer, duplicateLayer, reorderLayers,
   onReplaceImage, onClearImage,
   isMobile, mobileTab,
-}) {
-  const dragSrc = useRef(null)
-  const [dragOver, setDragOver] = useState(null)
+}: SidePanelProps) {
+  const dragSrc = useRef<number | null>(null)
+  const [dragOver, setDragOver] = useState<number | null>(null)
 
-  const show = (key) => isMobile ? mobileTab === key : true
+  const show = (key: string) => isMobile ? mobileTab === key : true
   return (
     <div className="panel">
       {show('image') && (
@@ -164,29 +189,4 @@ export default function SidePanel({
       ))}
     </div>
   )
-}
-
-PanelBlock.propTypes = {
-  title: PropTypes.string.isRequired,
-  subtitle: PropTypes.string,
-  action: PropTypes.node,
-  children: PropTypes.node.isRequired,
-}
-
-SidePanel.propTypes = {
-  image: PropTypes.shape({ src: PropTypes.string.isRequired, w: PropTypes.number.isRequired, h: PropTypes.number.isRequired }),
-  layers: PropTypes.arrayOf(PropTypes.object).isRequired,
-  selected: PropTypes.object,
-  selectedId: PropTypes.string,
-  setSelectedId: PropTypes.func.isRequired,
-  addText: PropTypes.func.isRequired,
-  addImageLayer: PropTypes.func.isRequired,
-  updateLayer: PropTypes.func.isRequired,
-  removeLayer: PropTypes.func.isRequired,
-  duplicateLayer: PropTypes.func.isRequired,
-  reorderLayers: PropTypes.func.isRequired,
-  onReplaceImage: PropTypes.func.isRequired,
-  onClearImage: PropTypes.func.isRequired,
-  isMobile: PropTypes.bool.isRequired,
-  mobileTab: PropTypes.string.isRequired,
 }

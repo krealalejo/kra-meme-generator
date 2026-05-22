@@ -4,11 +4,13 @@ import pepe from '../assets/pepe.webp'
 import pepeMageThumb from '../assets/pepe-mage-thumb.webp'
 import pepeSadThumb from '../assets/pepe-sad-thumb.webp'
 import pepeThumb from '../assets/pepe-thumb.webp'
-export function clamp(v, a, b) {
+import type { TextLayerData, ImageLayerData } from '../types'
+
+export function clamp(v: number, a: number, b: number): number {
   return Math.max(a, Math.min(b, v))
 }
 
-export function mkText(opts = {}) {
+export function mkText(opts: Partial<Omit<TextLayerData, 'type' | 'id'>> = {}): TextLayerData {
   return {
     type: 'text',
     id: crypto.randomUUID(),
@@ -29,7 +31,7 @@ export function mkText(opts = {}) {
   }
 }
 
-export function mkImageLayer(opts = {}) {
+export function mkImageLayer(opts: Partial<Omit<ImageLayerData, 'type' | 'id'>> = {}): ImageLayerData {
   return {
     type: 'image',
     id: crypto.randomUUID(),
@@ -43,7 +45,7 @@ export function mkImageLayer(opts = {}) {
   }
 }
 
-export function makeSamplePlaceholder(bg, line1, line2) {
+export function makeSamplePlaceholder(bg: string, line1: string, line2: string): string {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600">
     <defs>
       <pattern id="p" width="40" height="40" patternUnits="userSpaceOnUse">
@@ -61,7 +63,7 @@ export function makeSamplePlaceholder(bg, line1, line2) {
   return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg)
 }
 
-export const SAMPLE_IMAGES = [
+export const SAMPLE_IMAGES: { label: string; src: string; thumb: string }[] = [
   { label: 'PEPE MAGE', src: pepeMage, thumb: pepeMageThumb },
   { label: 'PEPE SAD', src: pepeSad, thumb: pepeSadThumb },
   { label: 'PEPE', src: pepe, thumb: pepeThumb },

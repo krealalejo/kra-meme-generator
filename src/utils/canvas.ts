@@ -1,6 +1,7 @@
 import { FONTS } from '../constants'
+import type { MemeImage, Layer, ImageLayerData, TextLayerData } from '../types'
 
-export function triggerDownload(blob, name) {
+export function triggerDownload(blob: Blob, name: string): void {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -11,7 +12,7 @@ export function triggerDownload(blob, name) {
   setTimeout(() => URL.revokeObjectURL(url), 5000)
 }
 
-export async function renderToBlob(image, layers, scale = 2) {
+export async function renderToBlob(image: MemeImage, layers: Layer[], scale = 2): Promise<Blob> {
   await document.fonts.ready
   const img = await loadImg(image.src)
   const W = image.w * scale
@@ -19,7 +20,7 @@ export async function renderToBlob(image, layers, scale = 2) {
   const canvas = document.createElement('canvas')
   canvas.width = W
   canvas.height = H
-  const ctx = canvas.getContext('2d')
+  const ctx = canvas.getContext('2d')!
   ctx.imageSmoothingEnabled = true
   ctx.imageSmoothingQuality = 'high'
   ctx.drawImage(img, 0, 0, W, H)
@@ -30,10 +31,17 @@ export async function renderToBlob(image, layers, scale = 2) {
       drawText(ctx, layer, W, H)
     }
   }
-  return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
+  return new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/png')
+  )
 }
 
-export async function drawImageLayer(ctx, layer, W, H) {
+export async function drawImageLayer(
+  ctx: CanvasRenderingContext2D,
+  layer: ImageLayerData,
+  W: number,
+  H: number
+): Promise<void> {
   const img = await loadImg(layer.src)
   const pxW = layer.w * W
   const pxH = pxW / layer.aspectRatio
@@ -44,7 +52,7 @@ export async function drawImageLayer(ctx, layer, W, H) {
   ctx.restore()
 }
 
-export function loadImg(src) {
+export function loadImg(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image()
     img.crossOrigin = 'anonymous'
@@ -54,7 +62,7 @@ export function loadImg(src) {
   })
 }
 
-export function drawText(ctx, t, W, H) {
+export function drawText(ctx: CanvasRenderingContext2D, t: TextLayerData, W: number, H: number): void {
   const fontDef = FONTS.find((f) => f.id === t.font) || FONTS[0]
   const sizePx = Math.max(8, t.size * H)
   const text = t.uppercase ? (t.text || '').toUpperCase() : t.text || ''

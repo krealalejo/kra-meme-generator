@@ -1,47 +1,55 @@
 import { useRef, useState } from 'react'
-import PropTypes from 'prop-types'
 
-function cropHint(m, isDrawing, validCrop) {
+interface Pt { x: number; y: number }
+interface Rect { x: number; y: number; w: number; h: number }
+
+interface CropModalProps {
+  layer: { src: string }
+  onSave: (src: string, aspectRatio: number) => void
+  onClose: () => void
+}
+
+function cropHint(m: string, isDrawing: boolean, validCrop: boolean | Rect | Pt[] | null) {
   if (m === 'rect') return 'drag to select area'
   if (isDrawing) return 'keep drawing · release to finish'
   if (validCrop) return 'shape ready · hit save or draw again'
   return 'draw around the area to crop'
 }
 
-export default function CropModal({ layer, onSave, onClose }) {
-  const imgRef = useRef(null)
-  const areaRef = useRef(null)
+export default function CropModal({ layer, onSave, onClose }: CropModalProps) {
+  const imgRef = useRef<HTMLImageElement>(null)
+  const areaRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
-  const startPt = useRef(null)
+  const startPt = useRef<Pt | null>(null)
 
-  const [mode, setMode] = useState('rect')
+  const [mode, setMode] = useState<'rect' | 'draw'>('rect')
   const [drawing, setDrawing] = useState(false)
-  const [cropRect, setCropRect] = useState(null)
-  const [lassoPoints, setLassoPoints] = useState(null)
+  const [cropRect, setCropRect] = useState<Rect | null>(null)
+  const [lassoPoints, setLassoPoints] = useState<Pt[] | null>(null)
 
-  const getAreaPt = (e) => {
-    const r = areaRef.current.getBoundingClientRect()
+  const getAreaPt = (e: React.PointerEvent): Pt => {
+    const r = areaRef.current!.getBoundingClientRect()
     return { x: e.clientX - r.left, y: e.clientY - r.top }
   }
 
-  const ptsToRect = (a, b) => ({
+  const ptsToRect = (a: Pt, b: Pt): Rect => ({
     x: Math.min(a.x, b.x),
     y: Math.min(a.y, b.y),
     w: Math.abs(a.x - b.x),
     h: Math.abs(a.y - b.y),
   })
 
-  const isInImg = (pt) => {
-    const ar = areaRef.current.getBoundingClientRect()
-    const ir = imgRef.current.getBoundingClientRect()
+  const isInImg = (pt: Pt): boolean => {
+    const ar = areaRef.current!.getBoundingClientRect()
+    const ir = imgRef.current!.getBoundingClientRect()
     const ix = ir.left - ar.left
     const iy = ir.top - ar.top
     return pt.x >= ix && pt.x <= ix + ir.width && pt.y >= iy && pt.y <= iy + ir.height
   }
 
-  const clampToImg = (pt) => {
-    const ar = areaRef.current.getBoundingClientRect()
-    const ir = imgRef.current.getBoundingClientRect()
+  const clampToImg = (pt: Pt): Pt => {
+    const ar = areaRef.current!.getBoundingClientRect()
+    const ir = imgRef.current!.getBoundingClientRect()
     const ix = ir.left - ar.left
     const iy = ir.top - ar.top
     return {
@@ -50,12 +58,12 @@ export default function CropModal({ layer, onSave, onClose }) {
     }
   }
 
-  const onPointerDown = (e) => {
+  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const pt = getAreaPt(e)
     if (!isInImg(pt)) return
     e.preventDefault()
     dragging.current = true
-    areaRef.current.setPointerCapture(e.pointerId)
+    areaRef.current!.setPointerCapture(e.pointerId)
     if (mode === 'rect') {
       startPt.current = pt
       setCropRect({ x: pt.x, y: pt.y, w: 0, h: 0 })
@@ -65,13 +73,13 @@ export default function CropModal({ layer, onSave, onClose }) {
     }
   }
 
-  const onPointerMove = (e) => {
+  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!dragging.current) return
     const pt = clampToImg(getAreaPt(e))
     if (mode === 'rect') {
-      setCropRect(ptsToRect(startPt.current, pt))
+      setCropRect(ptsToRect(startPt.current!, pt))
     } else {
-      setLassoPoints((prev) => [...prev, pt])
+      setLassoPoints((prev) => [...(prev ?? []), pt])
     }
   }
 
@@ -80,7 +88,7 @@ export default function CropModal({ layer, onSave, onClose }) {
     setDrawing(false)
   }
 
-  const switchMode = (m) => {
+  const switchMode = (m: 'rect' | 'draw') => {
     setMode(m)
     setCropRect(null)
     setLassoPoints(null)
@@ -94,8 +102,8 @@ export default function CropModal({ layer, onSave, onClose }) {
 
   const saveRect = () => {
     if (!cropRect || cropRect.w < 5 || cropRect.h < 5) { onClose(); return }
-    const img = imgRef.current
-    const ar = areaRef.current.getBoundingClientRect()
+    const img = imgRef.current!
+    const ar = areaRef.current!.getBoundingClientRect()
     const ir = img.getBoundingClientRect()
     const ix = ir.left - ar.left
     const iy = ir.top - ar.top
@@ -108,14 +116,14 @@ export default function CropModal({ layer, onSave, onClose }) {
     const canvas = document.createElement('canvas')
     canvas.width = Math.round(sw)
     canvas.height = Math.round(sh)
-    canvas.getContext('2d').drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh)
+    canvas.getContext('2d')!.drawImage(img, sx, sy, sw, sh, 0, 0, sw, sh)
     onSave(canvas.toDataURL('image/png'), sw / sh)
   }
 
   const saveLasso = () => {
     if (!lassoPoints || lassoPoints.length < 3) { onClose(); return }
-    const img = imgRef.current
-    const ar = areaRef.current.getBoundingClientRect()
+    const img = imgRef.current!
+    const ar = areaRef.current!.getBoundingClientRect()
     const ir = img.getBoundingClientRect()
     const ix = ir.left - ar.left
     const iy = ir.top - ar.top
@@ -138,7 +146,7 @@ export default function CropModal({ layer, onSave, onClose }) {
     const canvas = document.createElement('canvas')
     canvas.width = w
     canvas.height = h
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d')!
     ctx.beginPath()
     imgPts.forEach((p, i) => {
       const px = p.x - minX
@@ -197,7 +205,7 @@ export default function CropModal({ layer, onSave, onClose }) {
           {mode === 'rect' && hasValidCrop && (
             <div
               className="crop-sel"
-              style={{ left: cropRect.x, top: cropRect.y, width: cropRect.w, height: cropRect.h }}
+              style={{ left: cropRect!.x, top: cropRect!.y, width: cropRect!.w, height: cropRect!.h }}
             />
           )}
 
@@ -218,10 +226,4 @@ export default function CropModal({ layer, onSave, onClose }) {
       </div>
     </div>
   )
-}
-
-CropModal.propTypes = {
-  layer: PropTypes.shape({ src: PropTypes.string.isRequired }).isRequired,
-  onSave: PropTypes.func.isRequired,
-  onClose: PropTypes.func.isRequired,
 }

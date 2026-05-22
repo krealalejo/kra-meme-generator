@@ -1,7 +1,11 @@
 import { useState, useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
-import PropTypes from 'prop-types'
 import { SAMPLE_IMAGES } from '../utils/text'
+
+interface DropZoneProps {
+  onPickFile: () => void
+  onSample: (src: string) => void
+}
 
 function FloatingStickers() {
   const stickers = [
@@ -25,9 +29,9 @@ function FloatingStickers() {
   )
 }
 
-export default function DropZone({ onPickFile, onSample }) {
+export default function DropZone({ onPickFile, onSample }: DropZoneProps) {
   const [hover, setHover] = useState(false)
-  const dropRef = useRef(null)
+  const dropRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (dropRef.current) {
@@ -38,7 +42,7 @@ export default function DropZone({ onPickFile, onSample }) {
     }
   }, [])
 
-  const handleSampleClick = (e, src) => {
+  const handleSampleClick = (e: React.MouseEvent<HTMLButtonElement>, src: string) => {
     e.stopPropagation()
     const chip = e.currentTarget
     gsap.timeline()
@@ -89,9 +93,4 @@ export default function DropZone({ onPickFile, onSample }) {
       <FloatingStickers />
     </div>
   )
-}
-
-DropZone.propTypes = {
-  onPickFile: PropTypes.func.isRequired,
-  onSample: PropTypes.func.isRequired,
 }

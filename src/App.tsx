@@ -10,15 +10,18 @@ import MobileFab from './components/MobileFab'
 import useIsMobile from './hooks/useIsMobile'
 import { mkText, mkImageLayer } from './utils/text'
 import { renderToBlob, triggerDownload } from './utils/canvas'
+import type { MemeImage, Layer, LayerPatch } from './types'
 
 export default function App() {
-  const [image, setImage] = useState(null)
-  const [layers, setLayers] = useState([])
-  const [selectedId, setSelectedId] = useState(null)
+  const [image, setImage] = useState<MemeImage | null>(null)
+  const [layers, setLayers] = useState<Layer[]>([])
+  const [selectedId, setSelectedId] = useState<string | null>(null)
   const [generating, setGenerating] = useState(false)
-  const [toast, setToast] = useState(null)
-  const [theme, setTheme] = useState(() => localStorage.getItem('mf-theme') || (globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'))
-  const [mobileTab, setMobileTab] = useState('layers')
+  const [toast, setToast] = useState<string | null>(null)
+  const [theme, setTheme] = useState<string>(
+    () => localStorage.getItem('mf-theme') || (globalThis.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+  )
+  const [mobileTab, setMobileTab] = useState<string>('layers')
   const [sheetOpen, setSheetOpen] = useState(false)
   const isMobile = useIsMobile()
 
@@ -34,15 +37,15 @@ export default function App() {
 
   const toggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'))
 
-  const stageRef = useRef(null)
-  const stageWrapRef = useRef(null)
-  const sideRef = useRef(null)
-  const fileInputRef = useRef(null)
-  const overlayInputRef = useRef(null)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const stageWrapRef = useRef<HTMLDivElement>(null)
+  const sideRef = useRef<HTMLElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const overlayInputRef = useRef<HTMLInputElement>(null)
 
   const selected = layers.find((l) => l.id === selectedId)
 
-  const selectLayer = useCallback((id) => {
+  const selectLayer = useCallback((id: string | null) => {
     setSelectedId(id)
     if (isMobile && id) {
       setMobileTab('edit')
@@ -60,7 +63,7 @@ export default function App() {
     })
   }, [])
 
-  const loadImageSrc = useCallback((src) => {
+  const loadImageSrc = useCallback((src: string) => {
     const img = new Image()
     img.crossOrigin = 'anonymous'
     img.onload = () => {
@@ -87,7 +90,7 @@ export default function App() {
     img.src = src
   }, [animateSidePanel])
 
-  const addImageLayer = useCallback((src) => {
+  const addImageLayer = useCallback((src: string) => {
     if (!image) { setToast('upload an image first'); return }
     const img = new Image()
     img.onload = () => {
@@ -99,14 +102,14 @@ export default function App() {
     img.src = src
   }, [image, selectLayer])
 
-  const readFileAsDataURL = useCallback((file) => new Promise((resolve, reject) => {
+  const readFileAsDataURL = useCallback((file: File) => new Promise<string>((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload = (e) => resolve(e.target.result)
+    reader.onload = (e) => resolve(e.target!.result as string)
     reader.onerror = reject
     reader.readAsDataURL(file)
   }), [])
 
-  const handleFile = useCallback((file) => {
+  const handleFile = useCallback((file: File | null | undefined) => {
     if (!file) return
     if (!file.type.startsWith('image/')) {
       setToast("that's not an image, friend")
@@ -115,7 +118,7 @@ export default function App() {
     readFileAsDataURL(file).then(loadImageSrc)
   }, [loadImageSrc, readFileAsDataURL])
 
-  const handleOverlayFile = useCallback((file) => {
+  const handleOverlayFile = useCallback((file: File | null | undefined) => {
     if (!file) return
     if (!file.type.startsWith('image/')) {
       setToast("that's not an image, friend")
@@ -125,10 +128,10 @@ export default function App() {
   }, [addImageLayer, readFileAsDataURL])
 
   useEffect(() => {
-    const onDragOver = (e) => e.preventDefault()
-    const onDrop = (e) => {
+    const onDragOver = (e: DragEvent) => e.preventDefault()
+    const onDrop = (e: DragEvent) => {
       e.preventDefault()
-      const file = e.dataTransfer.files?.[0]
+      const file = e.dataTransfer?.files?.[0]
       if (file) handleFile(file)
     }
     globalThis.addEventListener('dragover', onDragOver)
@@ -140,7 +143,7 @@ export default function App() {
   }, [handleFile])
 
   useEffect(() => {
-    const onPaste = (e) => {
+    const onPaste = (e: ClipboardEvent) => {
       const items = e.clipboardData?.items
       if (!items) return
       for (const item of items) {
@@ -174,15 +177,19 @@ export default function App() {
     selectLayer(t.id)
   }, [image, selectLayer])
 
-  const updateLayer = useCallback((id, patch) =>
-    setLayers((prev) => prev.map((l) => (l.id === id ? { ...l, ...patch } : l))), [])
+  const updateLayer = useCallback((id: string, patch: LayerPatch) =>
+    setLayers((prev) => prev.map((l): Layer => {
+      if (l.id !== id) return l
+      if (l.type === 'text') return { ...l, ...patch }
+      return { ...l, ...patch }
+    })), [])
 
-  const removeLayer = useCallback((id) => {
+  const removeLayer = useCallback((id: string) => {
     setLayers((prev) => prev.filter((l) => l.id !== id))
     setSelectedId((sel) => sel === id ? null : sel)
   }, [])
 
-  const reorderLayers = useCallback((fromIdx, toIdx) => {
+  const reorderLayers = useCallback((fromIdx: number, toIdx: number) => {
     if (fromIdx === toIdx) return
     setLayers((prev) => {
       const next = [...prev]
@@ -206,12 +213,15 @@ export default function App() {
     })
   }, [])
 
-  const duplicateLayer = useCallback((id) => {
+  const duplicateLayer = useCallback((id: string) => {
     const newId = crypto.randomUUID()
     setLayers((prev) => {
       const l = prev.find((x) => x.id === id)
       if (!l) return prev
-      return [...prev, { ...l, id: newId, y: Math.min(0.95, l.y + 0.06) }]
+      const dup = l.type === 'text'
+        ? { ...l, id: newId, y: Math.min(0.95, l.y + 0.06) }
+        : { ...l, id: newId, y: Math.min(0.95, l.y + 0.06) }
+      return [...prev, dup]
     })
     selectLayer(newId)
   }, [selectLayer])

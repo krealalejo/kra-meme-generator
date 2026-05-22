@@ -1,10 +1,16 @@
 import { forwardRef, memo, useRef, useState, useEffect, useCallback } from 'react'
-import PropTypes from 'prop-types'
 import { gsap } from 'gsap'
 import TextLayer from './TextLayer'
 import ImageLayer from './ImageLayer'
+import type { MemeImage, Layer, Box, LayerPatch } from '../types'
 
-const StageMeta = memo(function StageMeta({ image, box, count }) {
+interface StageMetaProps {
+  image: MemeImage
+  box: Box
+  count: number
+}
+
+const StageMeta = memo(function StageMeta({ image, box, count }: StageMetaProps) {
   return (
     <div className="stage-meta mono">
       <span>{image.w}×{image.h}px</span>
@@ -16,21 +22,23 @@ const StageMeta = memo(function StageMeta({ image, box, count }) {
   )
 })
 
-StageMeta.propTypes = {
-  image: PropTypes.shape({ w: PropTypes.number.isRequired, h: PropTypes.number.isRequired }).isRequired,
-  box: PropTypes.shape({ w: PropTypes.number.isRequired }).isRequired,
-  count: PropTypes.number.isRequired,
+interface StageProps {
+  image: MemeImage
+  layers: Layer[]
+  selectedId: string | null
+  setSelectedId: (id: string | null) => void
+  updateLayer: (id: string, patch: LayerPatch) => void
 }
 
-const Stage = forwardRef(function Stage(
+const Stage = forwardRef<HTMLDivElement, StageProps>(function Stage(
   { image, layers, selectedId, setSelectedId, updateLayer },
   ref
 ) {
-  const innerRef = useRef(null)
-  const [box, setBox] = useState({ w: 0, h: 0 })
+  const innerRef = useRef<HTMLDivElement>(null)
+  const [box, setBox] = useState<Box>({ w: 0, h: 0 })
 
-  const handleSelect = useCallback((id) => setSelectedId(id), [setSelectedId])
-  const handleUpdate = useCallback((id, patch) => updateLayer(id, patch), [updateLayer])
+  const handleSelect = useCallback((id: string) => setSelectedId(id), [setSelectedId])
+  const handleUpdate = useCallback((id: string, patch: LayerPatch) => updateLayer(id, patch), [updateLayer])
 
   useEffect(() => {
     if (innerRef.current) {
@@ -64,9 +72,13 @@ const Stage = forwardRef(function Stage(
       <div
         role="presentation"
         className="stage"
-        ref={(el) => { innerRef.current = el; if (ref) ref.current = el }}
+        ref={(el) => {
+          innerRef.current = el
+          if (typeof ref === 'function') ref(el)
+          else if (ref) ref.current = el
+        }}
         style={{ width: box.w, height: box.h }}
-        onMouseDown={(e) => { if (e.target.classList.contains('stage')) setSelectedId(null) }}
+        onMouseDown={(e) => { if ((e.target as HTMLElement).classList.contains('stage')) setSelectedId(null) }}
       >
         <img className="stage-img" src={image.src} alt="" draggable={false} />
         {layers.map((layer) =>
@@ -95,13 +107,5 @@ const Stage = forwardRef(function Stage(
     </div>
   )
 })
-
-Stage.propTypes = {
-  image: PropTypes.shape({ src: PropTypes.string.isRequired, w: PropTypes.number.isRequired, h: PropTypes.number.isRequired }).isRequired,
-  layers: PropTypes.arrayOf(PropTypes.object).isRequired,
-  selectedId: PropTypes.string,
-  setSelectedId: PropTypes.func.isRequired,
-  updateLayer: PropTypes.func.isRequired,
-}
 
 export default Stage

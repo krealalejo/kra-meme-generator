@@ -1,14 +1,16 @@
 import { useRef } from 'react'
-import PropTypes from 'prop-types'
 import { gsap } from 'gsap'
 import { FONTS, PRESET_COLORS, STROKE_COLORS } from '../constants'
+import type { TextLayerData } from '../types'
 
-Row.propTypes = {
-  label: PropTypes.string.isRequired,
-  children: PropTypes.node.isRequired,
+type TextLayerPatch = Partial<Omit<TextLayerData, 'type' | 'id'>>
+
+interface RowProps {
+  label: string
+  children: React.ReactNode
 }
 
-function Row({ label, children }) {
+function Row({ label, children }: RowProps) {
   return (
     <div className="ed-row">
       <span className="ed-label mono">{label}</span>
@@ -17,13 +19,13 @@ function Row({ label, children }) {
   )
 }
 
-Swatches.propTypes = {
-  colors: PropTypes.arrayOf(PropTypes.string).isRequired,
-  value: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
+interface SwatchesProps {
+  colors: string[]
+  value: string
+  onChange: (c: string) => void
 }
 
-function Swatches({ colors, value, onChange }) {
+function Swatches({ colors, value, onChange }: SwatchesProps) {
   return (
     <div className="swatches">
       {colors.map((c) => (
@@ -43,8 +45,15 @@ function Swatches({ colors, value, onChange }) {
   )
 }
 
-export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }) {
-  const editorRef = useRef(null)
+interface TextEditorProps {
+  t: TextLayerData
+  onUpdate: (patch: TextLayerPatch) => void
+  onDuplicate: () => void
+  onDelete: () => void
+}
+
+export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }: TextEditorProps) {
+  const editorRef = useRef<HTMLDivElement>(null)
 
   const handleDelete = () => {
     gsap.to(editorRef.current, {
@@ -145,25 +154,4 @@ export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }) {
       </div>
     </div>
   )
-}
-
-const textLayerShape = PropTypes.shape({
-  text: PropTypes.string,
-  font: PropTypes.string,
-  size: PropTypes.number,
-  rotation: PropTypes.number,
-  stroke: PropTypes.number,
-  tracking: PropTypes.number,
-  color: PropTypes.string,
-  strokeColor: PropTypes.string,
-  uppercase: PropTypes.bool,
-  weight: PropTypes.number,
-  shadow: PropTypes.bool,
-})
-
-TextEditor.propTypes = {
-  t: textLayerShape.isRequired,
-  onUpdate: PropTypes.func.isRequired,
-  onDuplicate: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
 }

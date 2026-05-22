@@ -1,6 +1,14 @@
-import PropTypes from 'prop-types'
+interface HeaderProps {
+  hasImage: boolean
+  onUpload: () => void
+  onDownload: () => void
+  generating: boolean
+  theme: string
+  onToggleTheme: () => void
+  isMobile: boolean
+}
 
-export default function Header({ hasImage, onUpload, onDownload, generating, theme, onToggleTheme, isMobile }) {
+export default function Header({ hasImage, onUpload, onDownload, generating, theme, onToggleTheme, isMobile }: HeaderProps) {
   let uploadLabel
   if (isMobile) {
     uploadLabel = hasImage ? 'NEW' : 'PICK'
@@ -35,14 +43,4 @@ export default function Header({ hasImage, onUpload, onDownload, generating, the
       </div>
     </header>
   )
-}
-
-Header.propTypes = {
-  hasImage: PropTypes.bool.isRequired,
-  onUpload: PropTypes.func.isRequired,
-  onDownload: PropTypes.func.isRequired,
-  generating: PropTypes.bool.isRequired,
-  theme: PropTypes.string.isRequired,
-  onToggleTheme: PropTypes.func.isRequired,
-  isMobile: PropTypes.bool.isRequired,
 }

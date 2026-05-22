@@ -1,24 +1,38 @@
 import { useRef, useEffect } from 'react'
-import PropTypes from 'prop-types'
+import type { Dispatch, SetStateAction } from 'react'
 
-export default function MobileSheetHeader({ tab, setTab, open, setOpen, counts }) {
+interface Counts {
+  hasImage: boolean
+  layers: number
+  hasSel: boolean
+}
+
+interface MobileSheetHeaderProps {
+  tab: string
+  setTab: Dispatch<SetStateAction<string>>
+  open: boolean
+  setOpen: Dispatch<SetStateAction<boolean>>
+  counts: Counts
+}
+
+export default function MobileSheetHeader({ tab, setTab, open, setOpen, counts }: MobileSheetHeaderProps) {
   const tabs = [
     { id: 'image', label: 'IMAGE' },
     { id: 'layers', label: 'LAYERS', badge: counts.layers > 0 ? String(counts.layers) : '' },
     { id: 'edit', label: 'EDIT' },
   ]
 
-  const grabRef = useRef(null)
+  const grabRef = useRef<HTMLButtonElement>(null)
   const isDragging = useRef(false)
   const startY = useRef(0)
   const startH = useRef(0)
 
   useEffect(() => {
-    const handlePointerMove = (e) => {
+    const handlePointerMove = (e: PointerEvent) => {
       if (!isDragging.current) return
       const currentY = e.clientY
       const deltaY = currentY - startY.current
-      const side = grabRef.current?.closest('.side')
+      const side = grabRef.current?.closest('.side') as HTMLElement | null
       if (side) {
         let newH = startH.current - deltaY
         if (newH < 52) newH = 52
@@ -26,10 +40,10 @@ export default function MobileSheetHeader({ tab, setTab, open, setOpen, counts }
       }
     }
 
-    const handlePointerUp = (e) => {
+    const handlePointerUp = (e: PointerEvent) => {
       if (!isDragging.current) return
       isDragging.current = false
-      const side = grabRef.current?.closest('.side')
+      const side = grabRef.current?.closest('.side') as HTMLElement | null
       if (side) {
         side.style.transition = ''
         side.style.maxHeight = ''
@@ -47,7 +61,7 @@ export default function MobileSheetHeader({ tab, setTab, open, setOpen, counts }
       }
     }
 
-    const preventScroll = (e) => {
+    const preventScroll = (e: Event) => {
       if (isDragging.current) e.preventDefault()
     }
 
@@ -62,10 +76,10 @@ export default function MobileSheetHeader({ tab, setTab, open, setOpen, counts }
     }
   }, [setOpen])
 
-  const handlePointerDown = (e) => {
+  const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
     isDragging.current = true
     startY.current = e.clientY
-    const side = grabRef.current?.closest('.side')
+    const side = grabRef.current?.closest('.side') as HTMLElement | null
     if (side) {
       startH.current = side.getBoundingClientRect().height
       side.style.transition = 'none'
@@ -106,16 +120,4 @@ export default function MobileSheetHeader({ tab, setTab, open, setOpen, counts }
       </div>
     </div>
   )
-}
-
-MobileSheetHeader.propTypes = {
-  tab: PropTypes.string.isRequired,
-  setTab: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-  setOpen: PropTypes.func.isRequired,
-  counts: PropTypes.shape({
-    hasImage: PropTypes.bool.isRequired,
-    layers: PropTypes.number.isRequired,
-    hasSel: PropTypes.bool.isRequired,
-  }).isRequired,
 }

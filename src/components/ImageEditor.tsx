@@ -1,8 +1,17 @@
 import { useState } from 'react'
-import PropTypes from 'prop-types'
 import CropModal from './CropModal'
+import type { ImageLayerData } from '../types'
 
-export default function ImageEditor({ layer, onUpdate, onDuplicate, onDelete }) {
+type ImageLayerPatch = Partial<Omit<ImageLayerData, 'type' | 'id'>>
+
+interface ImageEditorProps {
+  layer: ImageLayerData
+  onUpdate: (patch: ImageLayerPatch) => void
+  onDuplicate: () => void
+  onDelete: () => void
+}
+
+export default function ImageEditor({ layer, onUpdate, onDuplicate, onDelete }: ImageEditorProps) {
   const [cropping, setCropping] = useState(false)
 
   return (
@@ -40,11 +49,4 @@ export default function ImageEditor({ layer, onUpdate, onDuplicate, onDelete }) 
       )}
     </div>
   )
-}
-
-ImageEditor.propTypes = {
-  layer: PropTypes.shape({ rotation: PropTypes.number.isRequired }).isRequired,
-  onUpdate: PropTypes.func.isRequired,
-  onDuplicate: PropTypes.func.isRequired,
-  onDelete: PropTypes.func.isRequired,
 }
