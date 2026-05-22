@@ -165,7 +165,6 @@ describe('Stage', () => {
   })
 
   it('ResizeObserver: normal case (h <= maxH)', () => {
-    // 1000×1000 container: maxW=968, maxH=968, ratio=4/3, h≈726 < 968 → w stays maxW
     render(<Stage {...makeProps()} />)
     act(() => triggerResize())
     expect(screen.queryByText(/scale 0%/)).not.toBeInTheDocument()
@@ -173,7 +172,6 @@ describe('Stage', () => {
   })
 
   it('ResizeObserver: tall case (h > maxH)', () => {
-    // 1000×100 container: maxW=968, maxH=68, ratio=4/3, h≈726 > 68 → clamp h=maxH
     rectSpy.mockReturnValue({ width: 1000, height: 100 })
     render(<Stage {...makeProps()} />)
     act(() => triggerResize())

@@ -81,7 +81,7 @@ describe('MobileSheetHeader', () => {
     render(<MobileSheetHeader {...mkProps({ setOpen })} />)
     const grab = screen.getByRole('button', { name: /open panel/i })
     fireEvent.pointerDown(grab, { clientY: 100, pointerId: 1 })
-    // drag up (negative delta) → should trigger setOpen(true) on pointerup
+
     fireEvent(window, new PointerEvent('pointerup', { clientY: 50 }))
     expect(setOpen).toHaveBeenCalledWith(true)
   })
@@ -101,7 +101,7 @@ describe('MobileSheetHeader', () => {
     const grab = screen.getByRole('button', { name: /open panel/i })
     fireEvent.pointerDown(grab, { clientY: 100, pointerId: 1 })
     fireEvent(window, new PointerEvent('pointerup', { clientY: 102 }))
-    // small delta → toggles: setOpen called with a function
+
     expect(setOpen).toHaveBeenCalled()
   })
 
