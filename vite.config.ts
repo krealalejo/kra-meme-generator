@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite'
+import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react-swc'
 
 export default defineConfig({
@@ -17,12 +17,12 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     globals: true,
-    setupFiles: ['./src/test-setup.js'],
+    setupFiles: ['./src/test-setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['lcov', 'text'],
       include: ['src/**'],
-      exclude: ['src/test-setup.js', '**/*.test.*', 'src/main.jsx', 'src/index.css', 'src/assets/**'],
+      exclude: ['src/test-setup.ts', '**/*.test.*', 'src/main.tsx', 'src/index.css', 'src/assets/**'],
       thresholds: {
         lines: 80,
         statements: 80,
