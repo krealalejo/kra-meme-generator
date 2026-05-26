@@ -7,9 +7,9 @@ export default defineConfig({
     target: 'esnext',
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          gsap: ['gsap'],
+        manualChunks: (id) => {
+          if (id.includes('gsap')) return 'gsap'
+          if (id.includes('node_modules')) return 'vendor'
         },
       },
     },
