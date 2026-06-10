@@ -2,6 +2,7 @@ interface HeaderProps {
   hasImage: boolean
   onUpload: () => void
   onDownload: () => void
+  onCopy: () => void
   generating: boolean
   theme: string
   onToggleTheme: () => void
@@ -9,7 +10,7 @@ interface HeaderProps {
   onReset: () => void
 }
 
-export default function Header({ hasImage, onUpload, onDownload, generating, theme, onToggleTheme, isMobile, onReset }: HeaderProps) {
+export default function Header({ hasImage, onUpload, onDownload, onCopy, generating, theme, onToggleTheme, isMobile, onReset }: HeaderProps) {
   let uploadLabel
   if (isMobile) {
     uploadLabel = hasImage ? 'NEW' : 'PICK'
@@ -38,13 +39,22 @@ export default function Header({ hasImage, onUpload, onDownload, generating, the
           <span>↑</span> {uploadLabel}
         </button>
         {!isMobile && (
-          <button
-            className={'btn btn-primary ' + (generating ? 'is-busy' : '')}
-            onClick={onDownload}
-            disabled={!hasImage || generating}
-          >
-            {generating ? 'GENERATING…' : 'DOWNLOAD ↓'}
-          </button>
+          <>
+            <button
+              className={'btn btn-primary ' + (generating ? 'is-busy' : '')}
+              onClick={onCopy}
+              disabled={!hasImage || generating}
+            >
+              {generating ? 'GENERATING…' : 'COPY ⧉'}
+            </button>
+            <button
+              className={'btn btn-primary ' + (generating ? 'is-busy' : '')}
+              onClick={onDownload}
+              disabled={!hasImage || generating}
+            >
+              {generating ? 'GENERATING…' : 'DOWNLOAD ↓'}
+            </button>
+          </>
         )}
       </div>
     </header>

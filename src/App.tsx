@@ -222,7 +222,7 @@ export default function App() {
     selectLayer(newId)
   }, [selectLayer])
 
-  const handleDownload = async () => {
+  const runGenAnimation = async (action: (blob: Blob) => Promise<void>, doneText: string) => {
     if (!image || generating) return
     setSelectedId(null)
     setGenerating(true)
@@ -258,7 +258,9 @@ export default function App() {
 
     try {
       const blob = await renderToBlob(image, layers)
-      triggerDownload(blob, `meme-${Date.now()}.png`)
+      await action(blob)
+      const doneEl = document.querySelector<HTMLElement>('#gen-overlay .done')
+      if (doneEl) doneEl.textContent = doneText
       gsap.to('#gen-overlay .done', {
         keyframes: [
           { scale: 0, rotate: -25, opacity: 0, duration: 0 },
@@ -277,6 +279,18 @@ export default function App() {
     setGenerating(false)
   }
 
+  const handleDownload = () =>
+    runGenAnimation(
+      async (blob) => triggerDownload(blob, `meme-${Date.now()}.png`),
+      'SAVED ✓'
+    )
+
+  const handleCopy = () =>
+    runGenAnimation(
+      async (blob) => navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]),
+      'COPIED ✓'
+    )
+
   const appClass = ['app', isMobile && 'is-mobile', isMobile && sheetOpen && 'sheet-open', isMobile && !image && 'no-image'].filter(Boolean).join(' ')
 
   return (
@@ -285,6 +299,7 @@ export default function App() {
         hasImage={!!image}
         onUpload={() => fileInputRef.current?.click()}
         onDownload={handleDownload}
+        onCopy={handleCopy}
         generating={generating}
         theme={theme}
         onToggleTheme={toggleTheme}
@@ -345,7 +360,7 @@ export default function App() {
       </main>
 
       {isMobile && image && (
-        <MobileFab generating={generating} onDownload={handleDownload} />
+        <MobileFab generating={generating} onDownload={handleDownload} onCopy={handleCopy} />
       )}
 
       <input
