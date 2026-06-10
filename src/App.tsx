@@ -289,6 +289,7 @@ export default function App() {
         theme={theme}
         onToggleTheme={toggleTheme}
         isMobile={isMobile}
+        onReset={clearImage}
       />
 
       <main className="main">

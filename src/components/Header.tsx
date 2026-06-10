@@ -6,9 +6,10 @@ interface HeaderProps {
   theme: string
   onToggleTheme: () => void
   isMobile: boolean
+  onReset: () => void
 }
 
-export default function Header({ hasImage, onUpload, onDownload, generating, theme, onToggleTheme, isMobile }: HeaderProps) {
+export default function Header({ hasImage, onUpload, onDownload, generating, theme, onToggleTheme, isMobile, onReset }: HeaderProps) {
   let uploadLabel
   if (isMobile) {
     uploadLabel = hasImage ? 'NEW' : 'PICK'
@@ -19,7 +20,12 @@ export default function Header({ hasImage, onUpload, onDownload, generating, the
   return (
     <header className="hdr">
       <div className="hdr-left">
-        <div className="logo">
+        <div
+          className="logo"
+          onClick={hasImage ? onReset : undefined}
+          style={hasImage ? { cursor: 'pointer' } : undefined}
+          title={hasImage ? 'Back to home' : undefined}
+        >
           <span className="logo-mark">M</span>
           <span className="logo-word">EMEFORGE</span>
         </div>
