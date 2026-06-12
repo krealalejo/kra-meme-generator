@@ -84,6 +84,37 @@ describe('CropModal', () => {
     expect(screen.getByText(/draw around/i)).toBeInTheDocument()
   })
 
+  it('ignores pointerDown outside the image area', () => {
+    render(<CropModal {...mkProps()} />)
+    const area = document.querySelector('.crop-area')
+    fireEvent.pointerDown(area, { clientX: 9999, clientY: 9999, pointerId: 1 })
+    expect(screen.getByText('save')).toBeDisabled()
+  })
+
+  it('ignores pointerMove when not dragging', () => {
+    render(<CropModal {...mkProps()} />)
+    const area = document.querySelector('.crop-area')
+    fireEvent.pointerMove(area, { clientX: 150, clientY: 150 })
+    expect(screen.getByText('save')).toBeDisabled()
+  })
+
+  it('lasso with too-small bounding box closes without saving', () => {
+    const onSave = vi.fn()
+    const onClose = vi.fn()
+    Object.defineProperty(HTMLImageElement.prototype, 'naturalWidth', { get: () => 600, configurable: true })
+    Object.defineProperty(HTMLImageElement.prototype, 'naturalHeight', { get: () => 400, configurable: true })
+    render(<CropModal {...mkProps({ onSave, onClose })} />)
+    fireEvent.click(screen.getByText(/DRAW/))
+    const area = document.querySelector('.crop-area')
+    fireEvent.pointerDown(area, { clientX: 100, clientY: 100, pointerId: 1 })
+    fireEvent.pointerMove(area, { clientX: 101, clientY: 100 })
+    fireEvent.pointerMove(area, { clientX: 100, clientY: 101 })
+    fireEvent.pointerUp(area)
+    fireEvent.click(screen.getByText('save'))
+    expect(onClose).toHaveBeenCalled()
+    expect(onSave).not.toHaveBeenCalled()
+  })
+
   it('draws lasso points in draw mode', () => {
     render(<CropModal {...mkProps()} />)
     fireEvent.click(screen.getByText(/DRAW/))

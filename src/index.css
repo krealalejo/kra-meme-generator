@@ -951,6 +951,11 @@ input, select, textarea { font-family: inherit; }
   align-items: center;
   justify-content: center;
   padding: 20px;
+  border: none;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  color: inherit;
 }
 .crop-modal {
   background: var(--bg);

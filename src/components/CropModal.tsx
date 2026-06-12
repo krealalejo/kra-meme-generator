@@ -16,7 +16,7 @@ function cropHint(m: string, isDrawing: boolean, validCrop: boolean | Rect | Pt[
   return 'draw around the area to crop'
 }
 
-export default function CropModal({ layer, onSave, onClose }: CropModalProps) {
+export default function CropModal({ layer, onSave, onClose }: Readonly<CropModalProps>) {
   const imgRef = useRef<HTMLImageElement>(null)
   const areaRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
@@ -79,6 +79,7 @@ export default function CropModal({ layer, onSave, onClose }: CropModalProps) {
     if (mode === 'rect') {
       setCropRect(ptsToRect(startPt.current!, pt))
     } else {
+      /* v8 ignore next -- prev is always seeded by pointerDown before move */
       setLassoPoints((prev) => [...(prev ?? []), pt])
     }
   }
@@ -101,6 +102,7 @@ export default function CropModal({ layer, onSave, onClose }: CropModalProps) {
   }
 
   const saveRect = () => {
+    /* v8 ignore next -- save button is disabled unless the rect is already valid */
     if (!cropRect || cropRect.w < 5 || cropRect.h < 5) { onClose(); return }
     const img = imgRef.current!
     const ar = areaRef.current!.getBoundingClientRect()
@@ -121,6 +123,7 @@ export default function CropModal({ layer, onSave, onClose }: CropModalProps) {
   }
 
   const saveLasso = () => {
+    /* v8 ignore next -- save button is disabled until at least 3 points exist */
     if (!lassoPoints || lassoPoints.length < 3) { onClose(); return }
     const img = imgRef.current!
     const ar = areaRef.current!.getBoundingClientRect()
@@ -167,7 +170,7 @@ export default function CropModal({ layer, onSave, onClose }: CropModalProps) {
   const lassoStr = lassoPoints ? lassoPoints.map((p) => `${p.x},${p.y}`).join(' ') : ''
 
   return (
-    <div className="crop-backdrop" onPointerDown={(e) => { if (e.target === e.currentTarget) onClose() }} aria-modal="true" role="dialog" aria-label="Crop image">
+    <dialog open className="crop-backdrop" onPointerDown={(e) => { if (e.target === e.currentTarget) onClose() }} aria-label="Crop image">
       <div className="crop-modal">
         <div className="crop-modal-hdr">
           <div className="crop-modal-hdr-left">
@@ -224,6 +227,6 @@ export default function CropModal({ layer, onSave, onClose }: CropModalProps) {
           {cropHint(mode, drawing, hasValidCrop)}
         </div>
       </div>
-    </div>
+    </dialog>
   )
 }
