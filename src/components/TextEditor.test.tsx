@@ -96,6 +96,23 @@ describe('TextEditor', () => {
     expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ color: expect.any(String) }))
   })
 
+  it('calls onUpdate with color from custom color input', () => {
+    const onUpdate = vi.fn()
+    render(<TextEditor t={mkT()} onUpdate={onUpdate} onDuplicate={vi.fn()} onDelete={vi.fn()} />)
+    const colorInput = document.querySelector('.swatch-custom input[type="color"]')
+    fireEvent.change(colorInput, { target: { value: '#123456' } })
+    expect(onUpdate).toHaveBeenCalledWith({ color: '#123456' })
+  })
+
+  it('calls onUpdate with strokeColor when EDGE swatch clicked', () => {
+    const onUpdate = vi.fn()
+    render(<TextEditor t={mkT({ strokeColor: '#000000' })} onUpdate={onUpdate} onDuplicate={vi.fn()} onDelete={vi.fn()} />)
+    const edgeRow = screen.getByText('EDGE').closest('.ed-row')
+    const swatch = edgeRow.querySelector('.swatch:not(.swatch-custom)')
+    fireEvent.click(swatch)
+    expect(onUpdate).toHaveBeenCalledWith(expect.objectContaining({ strokeColor: expect.any(String) }))
+  })
+
   it('toggles uppercase on UPPER button click', () => {
     const onUpdate = vi.fn()
     render(<TextEditor t={mkT({ uppercase: false })} onUpdate={onUpdate} onDuplicate={vi.fn()} onDelete={vi.fn()} />)
@@ -120,6 +137,11 @@ describe('TextEditor', () => {
     render(<TextEditor t={mkT({ weight: 400 })} onUpdate={onUpdate} onDuplicate={vi.fn()} onDelete={vi.fn()} />)
     fireEvent.click(screen.getByText('BOLD'))
     expect(onUpdate).toHaveBeenCalledWith({ weight: 800 })
+  })
+
+  it('SHADOW has is-on class when shadow is true', () => {
+    render(<TextEditor t={mkT({ shadow: true })} onUpdate={vi.fn()} onDuplicate={vi.fn()} onDelete={vi.fn()} />)
+    expect(screen.getByText('SHADOW')).toHaveClass('is-on')
   })
 
   it('toggles shadow on SHADOW click', () => {

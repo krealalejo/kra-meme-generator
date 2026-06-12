@@ -10,7 +10,7 @@ interface RowProps {
   children: React.ReactNode
 }
 
-function Row({ label, children }: RowProps) {
+function Row({ label, children }: Readonly<RowProps>) {
   return (
     <div className="ed-row">
       <span className="ed-label mono">{label}</span>
@@ -25,7 +25,7 @@ interface SwatchesProps {
   onChange: (c: string) => void
 }
 
-function Swatches({ colors, value, onChange }: SwatchesProps) {
+function Swatches({ colors, value, onChange }: Readonly<SwatchesProps>) {
   return (
     <div className="swatches">
       {colors.map((c) => (
@@ -52,7 +52,7 @@ interface TextEditorProps {
   onDelete: () => void
 }
 
-export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }: TextEditorProps) {
+export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }: Readonly<TextEditorProps>) {
   const editorRef = useRef<HTMLDivElement>(null)
 
   const handleDelete = () => {
