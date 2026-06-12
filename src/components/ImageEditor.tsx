@@ -11,7 +11,7 @@ interface ImageEditorProps {
   onDelete: () => void
 }
 
-export default function ImageEditor({ layer, onUpdate, onDuplicate, onDelete }: ImageEditorProps) {
+export default function ImageEditor({ layer, onUpdate, onDuplicate, onDelete }: Readonly<ImageEditorProps>) {
   const [cropping, setCropping] = useState(false)
 
   return (
