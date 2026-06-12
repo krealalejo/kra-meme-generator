@@ -105,6 +105,19 @@ describe('MobileSheetHeader', () => {
     expect(setOpen).toHaveBeenCalled()
   })
 
+  it('tap toggle passes a function updater that flips open state', () => {
+    const setOpen = vi.fn()
+    render(<MobileSheetHeader {...mkProps({ open: false, setOpen })} />)
+    const grab = screen.getByRole('button', { name: /open panel/i })
+    fireEvent.pointerDown(grab, { clientY: 100, pointerId: 1 })
+    fireEvent(window, new PointerEvent('pointerup', { clientY: 102 }))
+
+    const updater = setOpen.mock.calls.at(-1)[0]
+    expect(typeof updater).toBe('function')
+    expect(updater(false)).toBe(true)
+    expect(updater(true)).toBe(false)
+  })
+
   it('pointermove while dragging does not throw', () => {
     render(<MobileSheetHeader {...mkProps()} />)
     const grab = screen.getByRole('button', { name: /open panel/i })
@@ -113,5 +126,67 @@ describe('MobileSheetHeader', () => {
       fireEvent(window, new PointerEvent('pointermove', { clientY: 80 }))
     }).not.toThrow()
     fireEvent(window, new PointerEvent('pointerup', { clientY: 80 }))
+  })
+
+  it('pointermove without prior pointerdown is a no-op', () => {
+    render(<MobileSheetHeader {...mkProps()} />)
+    expect(() => {
+      fireEvent(window, new PointerEvent('pointermove', { clientY: 80 }))
+    }).not.toThrow()
+  })
+
+  it('pointerup without prior pointerdown is a no-op', () => {
+    const setOpen = vi.fn()
+    render(<MobileSheetHeader {...mkProps({ setOpen })} />)
+    fireEvent(window, new PointerEvent('pointerup', { clientY: 80 }))
+    expect(setOpen).not.toHaveBeenCalled()
+  })
+
+  describe('with .side ancestor', () => {
+    function renderInSide(props = {}) {
+      const side = document.createElement('div')
+      side.className = 'side'
+      document.body.appendChild(side)
+      return render(<MobileSheetHeader {...mkProps(props)} />, { container: side })
+    }
+
+    it('sets max-height on .side while dragging up', () => {
+      renderInSide()
+      const grab = screen.getByRole('button', { name: /open panel/i })
+      const side = document.querySelector('.side')
+      fireEvent.pointerDown(grab, { clientY: 200, pointerId: 1 })
+      expect(side.style.transition).toBe('none')
+      fireEvent(window, new PointerEvent('pointermove', { clientY: 150 }))
+      expect(side.style.maxHeight).toBe('250px')
+      fireEvent(window, new PointerEvent('pointerup', { clientY: 150 }))
+      expect(side.style.maxHeight).toBe('')
+    })
+
+    it('clamps max-height to 52px minimum when dragging far down', () => {
+      renderInSide()
+      const grab = screen.getByRole('button', { name: /open panel/i })
+      const side = document.querySelector('.side')
+      fireEvent.pointerDown(grab, { clientY: 100, pointerId: 1 })
+      fireEvent(window, new PointerEvent('pointermove', { clientY: 9999 }))
+      expect(side.style.maxHeight).toBe('52px')
+      fireEvent(window, new PointerEvent('pointerup', { clientY: 9999 }))
+    })
+
+    it('prevents touchmove scroll while dragging', () => {
+      renderInSide()
+      const grab = screen.getByRole('button', { name: /open panel/i })
+      fireEvent.pointerDown(grab, { clientY: 100, pointerId: 1 })
+      const evt = new Event('touchmove', { cancelable: true })
+      globalThis.dispatchEvent(evt)
+      expect(evt.defaultPrevented).toBe(true)
+      fireEvent(window, new PointerEvent('pointerup', { clientY: 100 }))
+    })
+
+    it('does not prevent touchmove when not dragging', () => {
+      renderInSide()
+      const evt = new Event('touchmove', { cancelable: true })
+      globalThis.dispatchEvent(evt)
+      expect(evt.defaultPrevented).toBe(false)
+    })
   })
 })

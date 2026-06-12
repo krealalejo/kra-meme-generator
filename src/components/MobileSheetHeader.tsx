@@ -15,7 +15,7 @@ interface MobileSheetHeaderProps {
   counts: Counts
 }
 
-export default function MobileSheetHeader({ tab, setTab, open, setOpen, counts }: MobileSheetHeaderProps) {
+export default function MobileSheetHeader({ tab, setTab, open, setOpen, counts }: Readonly<MobileSheetHeaderProps>) {
   const tabs = [
     { id: 'image', label: 'IMAGE' },
     { id: 'layers', label: 'LAYERS', badge: counts.layers > 0 ? String(counts.layers) : '' },
@@ -84,6 +84,7 @@ export default function MobileSheetHeader({ tab, setTab, open, setOpen, counts }
       startH.current = side.getBoundingClientRect().height
       side.style.transition = 'none'
     }
+    /* v8 ignore next -- grabRef is always attached to the rendered button */
     if (grabRef.current) {
       grabRef.current.setPointerCapture(e.pointerId)
     }
