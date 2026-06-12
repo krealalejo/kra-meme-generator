@@ -4,7 +4,7 @@ interface MobileFabProps {
   onCopy: () => void
 }
 
-export default function MobileFab({ generating, onDownload, onCopy }: MobileFabProps) {
+export default function MobileFab({ generating, onDownload, onCopy }: Readonly<MobileFabProps>) {
   return (
     <div className="fab-wrap">
       <button
