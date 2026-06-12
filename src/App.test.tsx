@@ -239,6 +239,23 @@ describe('App', () => {
     expect(triggerDownload).toHaveBeenCalled()
   })
 
+  it('copies meme to clipboard via COPY button', async () => {
+    const write = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { value: { write }, configurable: true })
+    global.ClipboardItem = class { constructor(data) { this.data = data } }
+
+    render(<App />)
+    fireEvent.click(screen.getByText('PEPE MAGE'))
+    await waitFor(() => screen.getAllByText('TOP TEXT'))
+
+    vi.useFakeTimers()
+    fireEvent.click(screen.getByText(/COPY/))
+    await act(() => vi.runAllTimersAsync())
+    vi.useRealTimers()
+
+    expect(write).toHaveBeenCalled()
+  })
+
   it('shows toast when renderToBlob throws', async () => {
     const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
     renderToBlob.mockRejectedValue(new Error('canvas error'))
@@ -508,6 +525,47 @@ describe('App', () => {
     useIsMobile.mockReturnValue(false)
     render(<App />)
     expect(document.querySelector('.app')).not.toHaveClass('no-image')
+  })
+
+  it('initializes dark theme from prefers-color-scheme when no stored theme', () => {
+    localStorage.removeItem('mf-theme')
+    const orig = globalThis.matchMedia
+    globalThis.matchMedia = vi.fn(() => ({ matches: true }))
+    render(<App />)
+    expect(document.documentElement.dataset.theme).toBe('dark')
+    globalThis.matchMedia = orig
+  })
+
+  it('shows toast when image fails to load', async () => {
+    global.Image = class {
+      set src(_v) { this.onerror?.() }
+    }
+    render(<App />)
+    fireEvent.click(screen.getByText('PEPE MAGE'))
+    await waitFor(() => {
+      expect(screen.getByText(/couldn't load that image/i)).toBeInTheDocument()
+    })
+  })
+
+  it('auto-dismisses toast after timeout', async () => {
+    vi.useFakeTimers()
+    render(<App />)
+    fireEvent.click(screen.getByText(/^TEXT$/))
+    expect(screen.getByText(/upload an image first/i)).toBeInTheDocument()
+    await act(() => vi.advanceTimersByTimeAsync(2300))
+    expect(screen.queryByText(/upload an image first/i)).not.toBeInTheDocument()
+    vi.useRealTimers()
+  })
+
+  it('overlay input change without image shows upload-first toast', async () => {
+    render(<App />)
+    const overlayInput = document.querySelectorAll('input[accept="image/*"]')[1]
+    const file = new File(['img'], 'overlay.png', { type: 'image/png' })
+    Object.defineProperty(overlayInput, 'files', { value: [file] })
+    fireEvent.change(overlayInput)
+    await waitFor(() => {
+      expect(screen.getByText(/upload an image first/i)).toBeInTheDocument()
+    })
   })
 
   it('skips side panel fromTo animation when panel already open', async () => {
