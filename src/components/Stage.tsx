@@ -41,6 +41,7 @@ const Stage = forwardRef<HTMLDivElement, StageProps>(function Stage(
   const handleUpdate = useCallback((id: string, patch: LayerPatch) => updateLayer(id, patch), [updateLayer])
 
   useEffect(() => {
+    /* v8 ignore next -- innerRef is always set when the mount effect runs */
     if (innerRef.current) {
       gsap.fromTo(
         innerRef.current,
@@ -51,7 +52,9 @@ const Stage = forwardRef<HTMLDivElement, StageProps>(function Stage(
   }, [])
 
   useEffect(() => {
+    /* v8 ignore next -- innerRef always set once mounted */
     const el = innerRef.current?.parentElement
+    /* v8 ignore next -- parent always present once mounted */
     if (!el) return
     const ro = new ResizeObserver(() => {
       const r = el.getBoundingClientRect()
@@ -70,7 +73,6 @@ const Stage = forwardRef<HTMLDivElement, StageProps>(function Stage(
   return (
     <div className="stage-outer">
       <div
-        role="presentation"
         className="stage"
         ref={(el) => {
           innerRef.current = el

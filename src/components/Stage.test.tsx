@@ -149,6 +149,12 @@ describe('Stage', () => {
     expect(() => render(<Stage {...makeProps()} />)).not.toThrow()
   })
 
+  it('forwards function ref to stage element', () => {
+    const refFn = vi.fn()
+    render(<Stage {...makeProps()} ref={refFn} />)
+    expect(refFn).toHaveBeenCalledWith(expect.objectContaining({ classList: expect.anything() }))
+  })
+
   it('shows singular layer count', () => {
     render(<Stage {...makeProps({ layers: [mkText()] })} />)
     expect(screen.getByText('1 layer')).toBeInTheDocument()
