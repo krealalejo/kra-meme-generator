@@ -26,6 +26,7 @@ const ImageLayer = memo(function ImageLayer({ layer, box, selected, onSelect, on
   const onPointerDown = (e: React.PointerEvent) => {
     e.stopPropagation()
     onSelect(layer.id)
+    /* v8 ignore next -- handle pointerdown stops propagation before reaching here */
     if ((e.target as HTMLElement).dataset.role === 'handle') return
     const { x, y } = layer
     startDrag(e.nativeEvent, (dx, dy) => onUpdate(layer.id, {

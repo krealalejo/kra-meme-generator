@@ -81,6 +81,16 @@ describe('ImageLayer', () => {
     expect(onUpdate).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ w: expect.any(Number) }))
   })
 
+  it('skips position drag when pointerDown originates on the resize handle', () => {
+    const onUpdate = vi.fn()
+    render(<ImageLayer {...mkProps({ selected: true, onUpdate })} />)
+    const handle = document.querySelector('.handle-resize')
+    fireEvent.pointerDown(handle, { clientX: 100, clientY: 100 })
+    fireEvent.pointerMove(window, { clientX: 100, clientY: 200 })
+    fireEvent.pointerUp(window)
+    expect(onUpdate).not.toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ x: expect.any(Number) }))
+  })
+
   it('sets position style from layer x/y', () => {
     const layer = mkImageLayer({ src: 'test.png', x: 0.25, y: 0.75, w: 0.2, aspectRatio: 1, rotation: 0 })
     render(<ImageLayer {...mkProps({ layer })} />)
