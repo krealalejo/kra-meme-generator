@@ -16,6 +16,7 @@ const TextLayer = memo(function TextLayer({ t, box, selected, onSelect, onUpdate
   const onPointerDown = (e: React.PointerEvent) => {
     e.stopPropagation()
     onSelect(t.id)
+    /* v8 ignore next -- handle pointerdown stops propagation before reaching here */
     if ((e.target as HTMLElement).dataset.role === 'handle') return
     const { x, y } = t
     startDrag(e.nativeEvent, (dx, dy) => onUpdate(t.id, {
@@ -52,9 +53,8 @@ const TextLayer = memo(function TextLayer({ t, box, selected, onSelect, onUpdate
   }
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       className={'layer ' + (selected ? 'is-selected' : '')}
       style={style}
       onPointerDown={onPointerDown}
@@ -78,7 +78,7 @@ const TextLayer = memo(function TextLayer({ t, box, selected, onSelect, onUpdate
           </span>
         </>
       )}
-    </div>
+    </button>
   )
 })
 

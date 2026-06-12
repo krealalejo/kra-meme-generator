@@ -90,7 +90,7 @@ describe('TextLayer', () => {
     expect(onUpdate).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ size: expect.any(Number) }))
   })
 
-  it('skips drag update if pointerDown target has data-role=handle', () => {
+  it('skips position drag when pointerDown originates on the resize handle', () => {
     const onUpdate = vi.fn()
     render(<TextLayer {...mkProps({ selected: true, onUpdate })} />)
     const handle = document.querySelector('.handle-resize')
@@ -98,6 +98,41 @@ describe('TextLayer', () => {
     fireEvent.pointerMove(window, { clientX: 200, clientY: 100 })
     fireEvent.pointerUp(window)
     expect(onUpdate).not.toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ x: expect.any(Number) }))
+  })
+
+  it('falls back to first font when font id is unknown', () => {
+    const props = mkProps()
+    props.t = { ...props.t, font: 'nonexistent-font' }
+    render(<TextLayer {...props} />)
+    expect(screen.getByText('HELLO')).toBeInTheDocument()
+  })
+
+  it('applies text shadow when shadow flag is set', () => {
+    const props = mkProps()
+    props.t = { ...props.t, shadow: true }
+    render(<TextLayer {...props} />)
+    expect(document.querySelector('.layer').style.textShadow).not.toBe('none')
+  })
+
+  it('calls onSelect when Enter pressed on layer', () => {
+    const onSelect = vi.fn()
+    render(<TextLayer {...mkProps({ onSelect })} />)
+    fireEvent.keyDown(document.querySelector('.layer'), { key: 'Enter' })
+    expect(onSelect).toHaveBeenCalledOnce()
+  })
+
+  it('calls onSelect when Space pressed on layer', () => {
+    const onSelect = vi.fn()
+    render(<TextLayer {...mkProps({ onSelect })} />)
+    fireEvent.keyDown(document.querySelector('.layer'), { key: ' ' })
+    expect(onSelect).toHaveBeenCalledOnce()
+  })
+
+  it('ignores other keys on layer', () => {
+    const onSelect = vi.fn()
+    render(<TextLayer {...mkProps({ onSelect })} />)
+    fireEvent.keyDown(document.querySelector('.layer'), { key: 'a' })
+    expect(onSelect).not.toHaveBeenCalled()
   })
 
   it('opens prompt on double click and updates text', () => {
