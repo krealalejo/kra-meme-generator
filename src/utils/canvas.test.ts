@@ -128,6 +128,29 @@ describe('triggerDownload', () => {
     expect(clickSpy).toHaveBeenCalled()
     createSpy.mockRestore()
   })
+
+  it('revokes the object URL after the timeout', () => {
+    vi.useFakeTimers()
+    const revokeObjectURL = vi.fn()
+    global.URL.createObjectURL = vi.fn(() => 'blob:mock-url')
+    global.URL.revokeObjectURL = revokeObjectURL
+    const origCreate = document.createElement.bind(document)
+    const createSpy = vi.spyOn(document, 'createElement').mockImplementation((tag) => {
+      if (tag === 'a') {
+        const el = origCreate('a')
+        el.click = vi.fn()
+        return el
+      }
+      return origCreate(tag)
+    })
+
+    triggerDownload(new Blob(['data'], { type: 'image/png' }), 'meme.png')
+    vi.advanceTimersByTime(5000)
+
+    expect(revokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
+    createSpy.mockRestore()
+    vi.useRealTimers()
+  })
 })
 
 describe('loadImg', () => {
@@ -187,6 +210,30 @@ describe('renderToBlob', () => {
     const layer = mkText({ text: 'HELLO', y: 0.5 })
     const blob = await renderToBlob({ src: 'test.png', w: 600, h: 400 }, [layer])
     expect(blob).toBeInstanceOf(Blob)
+    vi.restoreAllMocks()
+  })
+
+  it('rejects when toBlob returns null', async () => {
+    const ctx2d = {
+      imageSmoothingEnabled: false, imageSmoothingQuality: '',
+      drawImage: vi.fn(), save: vi.fn(), restore: vi.fn(),
+      translate: vi.fn(), rotate: vi.fn(),
+      fillText: vi.fn(), strokeText: vi.fn(),
+      font: '', textAlign: '', textBaseline: '',
+      lineWidth: 0, strokeStyle: '', lineJoin: '', miterLimit: 0,
+      fillStyle: '', shadowColor: '', shadowBlur: 0, shadowOffsetY: 0,
+    }
+    const mockCanvas = {
+      width: 0, height: 0,
+      getContext: () => ctx2d,
+      toBlob: (cb) => cb(null),
+    }
+    const origCreate = document.createElement.bind(document)
+    vi.spyOn(document, 'createElement').mockImplementation((tag) => {
+      if (tag === 'canvas') return mockCanvas
+      return origCreate(tag)
+    })
+    await expect(renderToBlob({ src: 'test.png', w: 600, h: 400 }, [])).rejects.toThrow('toBlob failed')
     vi.restoreAllMocks()
   })
 
