@@ -58,4 +58,25 @@ describe('DropZone', () => {
     fireEvent.click(screen.getByText('PEPE'))
     expect(onSample).toHaveBeenCalledOnce()
   })
+
+  it('calls onPickFile when Enter pressed on drop zone', () => {
+    const onPickFile = vi.fn()
+    render(<DropZone onPickFile={onPickFile} onSample={vi.fn()} />)
+    fireEvent.keyDown(document.querySelector('.drop'), { key: 'Enter' })
+    expect(onPickFile).toHaveBeenCalledOnce()
+  })
+
+  it('calls onPickFile when Space pressed on drop zone', () => {
+    const onPickFile = vi.fn()
+    render(<DropZone onPickFile={onPickFile} onSample={vi.fn()} />)
+    fireEvent.keyDown(document.querySelector('.drop'), { key: ' ' })
+    expect(onPickFile).toHaveBeenCalledOnce()
+  })
+
+  it('ignores other keys on drop zone', () => {
+    const onPickFile = vi.fn()
+    render(<DropZone onPickFile={onPickFile} onSample={vi.fn()} />)
+    fireEvent.keyDown(document.querySelector('.drop'), { key: 'a' })
+    expect(onPickFile).not.toHaveBeenCalled()
+  })
 })

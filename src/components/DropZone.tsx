@@ -29,11 +29,12 @@ function FloatingStickers() {
   )
 }
 
-export default function DropZone({ onPickFile, onSample }: DropZoneProps) {
+export default function DropZone({ onPickFile, onSample }: Readonly<DropZoneProps>) {
   const [hover, setHover] = useState(false)
   const dropRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    /* v8 ignore next -- dropRef is always attached when the effect runs */
     if (dropRef.current) {
       gsap.fromTo(dropRef.current,
         { opacity: 0, scale: 0.97 },
