@@ -128,6 +128,60 @@ describe('SidePanel — layers block', () => {
     expect(screen.getByText('1 item')).toBeInTheDocument()
   })
 
+  it('calls setSelectedId when Enter pressed on layer row', () => {
+    const setSelectedId = vi.fn()
+    const layer = mkText({ text: 'KEYNAV' })
+    render(<SidePanel {...base} layers={[layer]} setSelectedId={setSelectedId} />)
+    const row = screen.getByText('KEYNAV').closest('.layer-row')
+    fireEvent.keyDown(row, { key: 'Enter' })
+    expect(setSelectedId).toHaveBeenCalledWith(layer.id)
+  })
+
+  it('calls setSelectedId when Space pressed on layer row', () => {
+    const setSelectedId = vi.fn()
+    const layer = mkText({ text: 'SPACENAV' })
+    render(<SidePanel {...base} layers={[layer]} setSelectedId={setSelectedId} />)
+    const row = screen.getByText('SPACENAV').closest('.layer-row')
+    fireEvent.keyDown(row, { key: ' ' })
+    expect(setSelectedId).toHaveBeenCalledWith(layer.id)
+  })
+
+  it('ignores other keys on layer row', () => {
+    const setSelectedId = vi.fn()
+    const layer = mkText({ text: 'OTHERKEY' })
+    render(<SidePanel {...base} layers={[layer]} setSelectedId={setSelectedId} />)
+    const row = screen.getByText('OTHERKEY').closest('.layer-row')
+    fireEvent.keyDown(row, { key: 'Escape' })
+    expect(setSelectedId).not.toHaveBeenCalled()
+  })
+
+  it('shows (empty) for text layer with no text', () => {
+    const layer = mkText({ text: '' })
+    render(<SidePanel {...base} layers={[layer]} />)
+    expect(screen.getByText('(empty)')).toBeInTheDocument()
+  })
+
+  it('clears drag-over state on drag leave', () => {
+    const layers = [mkText({ text: 'A' }), mkText({ text: 'B' })]
+    render(<SidePanel {...base} layers={layers} />)
+    const rows = screen.getAllByRole('button', { name: /A|B/ })
+    fireEvent.dragOver(rows[1], { dataTransfer: { dropEffect: '' } })
+    expect(rows[1]).toHaveClass('is-drag-over')
+    fireEvent.dragLeave(rows[1])
+    expect(rows[1]).not.toHaveClass('is-drag-over')
+  })
+
+  it('resets drag state on drag end', () => {
+    const reorderLayers = vi.fn()
+    const layers = [mkText({ text: 'A' }), mkText({ text: 'B' })]
+    render(<SidePanel {...base} layers={layers} reorderLayers={reorderLayers} />)
+    const rows = screen.getAllByRole('button', { name: /A|B/ })
+    fireEvent.dragStart(rows[0], { dataTransfer: { effectAllowed: '' } })
+    fireEvent.dragEnd(rows[0])
+    fireEvent.drop(rows[1], { dataTransfer: {} })
+    expect(reorderLayers).not.toHaveBeenCalled()
+  })
+
   it('triggers reorderLayers on drag and drop', () => {
     const reorderLayers = vi.fn()
     const layers = [mkText({ text: 'A' }), mkText({ text: 'B' })]
@@ -156,6 +210,46 @@ describe('SidePanel — edit block', () => {
     const layer = mkImageLayer({ src: 'img.png', rotation: 15 })
     render(<SidePanel {...base} layers={[layer]} selected={layer} selectedId={layer.id} />)
     expect(screen.getByText('15°')).toBeInTheDocument()
+  })
+
+  it('updateLayer called from ImageEditor rotation change', () => {
+    const updateLayer = vi.fn()
+    const layer = mkImageLayer({ src: 'img.png', rotation: 0 })
+    render(<SidePanel {...base} layers={[layer]} selected={layer} selectedId={layer.id} updateLayer={updateLayer} />)
+    fireEvent.change(screen.getByRole('slider'), { target: { value: '30' } })
+    expect(updateLayer).toHaveBeenCalledWith(layer.id, { rotation: 30 })
+  })
+
+  it('duplicateLayer called from ImageEditor duplicate button', () => {
+    const duplicateLayer = vi.fn()
+    const layer = mkImageLayer({ src: 'img.png' })
+    render(<SidePanel {...base} layers={[layer]} selected={layer} selectedId={layer.id} duplicateLayer={duplicateLayer} />)
+    fireEvent.click(screen.getByText('duplicate'))
+    expect(duplicateLayer).toHaveBeenCalledWith(layer.id)
+  })
+
+  it('removeLayer called from ImageEditor delete button', () => {
+    const removeLayer = vi.fn()
+    const layer = mkImageLayer({ src: 'img.png' })
+    render(<SidePanel {...base} layers={[layer]} selected={layer} selectedId={layer.id} removeLayer={removeLayer} />)
+    fireEvent.click(screen.getByText('delete'))
+    expect(removeLayer).toHaveBeenCalledWith(layer.id)
+  })
+
+  it('removeLayer called from TextEditor delete button', () => {
+    const removeLayer = vi.fn()
+    const layer = mkText({ text: 'DEL' })
+    render(<SidePanel {...base} layers={[layer]} selected={layer} selectedId={layer.id} removeLayer={removeLayer} />)
+    fireEvent.click(screen.getByText('delete'))
+    expect(removeLayer).toHaveBeenCalledWith(layer.id)
+  })
+
+  it('updateLayer called from TextEditor text change', () => {
+    const updateLayer = vi.fn()
+    const layer = mkText({ text: 'OLD' })
+    render(<SidePanel {...base} layers={[layer]} selected={layer} selectedId={layer.id} updateLayer={updateLayer} />)
+    fireEvent.change(screen.getByDisplayValue('OLD'), { target: { value: 'NEW' } })
+    expect(updateLayer).toHaveBeenCalledWith(layer.id, { text: 'NEW' })
   })
 })
 

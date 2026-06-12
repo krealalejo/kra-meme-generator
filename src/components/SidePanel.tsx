@@ -11,7 +11,7 @@ interface PanelBlockProps {
   children: React.ReactNode
 }
 
-function PanelBlock({ title, subtitle, action, children }: PanelBlockProps) {
+function PanelBlock({ title, subtitle, action, children }: Readonly<PanelBlockProps>) {
   return (
     <section className="block">
       <header className="block-hdr">
@@ -49,7 +49,7 @@ export default function SidePanel({
   addText, addImageLayer, updateLayer, removeLayer, duplicateLayer, reorderLayers,
   onReplaceImage, onClearImage,
   isMobile, mobileTab,
-}: SidePanelProps) {
+}: Readonly<SidePanelProps>) {
   const dragSrc = useRef<number | null>(null)
   const [dragOver, setDragOver] = useState<number | null>(null)
 
@@ -126,7 +126,7 @@ export default function SidePanel({
                     dragSrc.current = null
                   }}
                   onDragEnd={() => { dragSrc.current = null; setDragOver(null) }}
-                  aria-selected={l.id === selectedId}
+                  aria-pressed={l.id === selectedId}
                 >
                   <span className="layer-row-drag" aria-hidden>⠿</span>
                   <span className="layer-row-idx mono">{String(idx + 1).padStart(2, '0')}</span>
