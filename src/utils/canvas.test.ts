@@ -192,6 +192,8 @@ describe('renderToBlob', () => {
       save: vi.fn(), restore: vi.fn(),
       translate: vi.fn(), rotate: vi.fn(),
       fillText: vi.fn(), strokeText: vi.fn(),
+      fillRect: vi.fn(), strokeRect: vi.fn(),
+      measureText: vi.fn(() => ({ width: 40 })),
       font: '', textAlign: '', textBaseline: '',
       lineWidth: 0, strokeStyle: '', lineJoin: '', miterLimit: 0,
       fillStyle: '', shadowColor: '', shadowBlur: 0, shadowOffsetY: 0,
@@ -219,6 +221,8 @@ describe('renderToBlob', () => {
       drawImage: vi.fn(), save: vi.fn(), restore: vi.fn(),
       translate: vi.fn(), rotate: vi.fn(),
       fillText: vi.fn(), strokeText: vi.fn(),
+      fillRect: vi.fn(), strokeRect: vi.fn(),
+      measureText: vi.fn(() => ({ width: 40 })),
       font: '', textAlign: '', textBaseline: '',
       lineWidth: 0, strokeStyle: '', lineJoin: '', miterLimit: 0,
       fillStyle: '', shadowColor: '', shadowBlur: 0, shadowOffsetY: 0,
@@ -241,7 +245,9 @@ describe('renderToBlob', () => {
     const ctx2d = {
       imageSmoothingEnabled: false, imageSmoothingQuality: '',
       drawImage: vi.fn(), save: vi.fn(), restore: vi.fn(),
-      translate: vi.fn(), rotate: vi.fn(),
+      translate: vi.fn(), rotate: vi.fn(), fillText: vi.fn(),
+      fillRect: vi.fn(), strokeRect: vi.fn(), strokeText: vi.fn(),
+      measureText: vi.fn(() => ({ width: 40 })),
     }
     const mockCanvas = {
       width: 0, height: 0,

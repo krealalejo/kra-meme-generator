@@ -31,9 +31,65 @@ export async function renderToBlob(image: MemeImage, layers: Layer[], scale = 2)
       drawText(ctx, layer, W, H)
     }
   }
+  drawWatermark(ctx, W, H)
   return new Promise<Blob>((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/png')
   )
+}
+
+export function drawWatermark(ctx: CanvasRenderingContext2D, W: number, H: number): void {
+  const LOGO_FONT = '"Anton", "Impact", "Haettenschweiler", sans-serif'
+  const LIME = '#C8F02C'
+  const INK = '#0E0E0E'
+
+  const fontPx = Math.max(9, Math.min(W, H) * 0.022)
+  const markSize = fontPx * 1.5
+  const gap = fontPx * 0.4
+  const pad = fontPx * 1.1
+
+  ctx.save()
+  ctx.globalAlpha = 0.55
+  ctx.font = `${fontPx}px ${LOGO_FONT}`
+  ctx.letterSpacing = '1px'
+  const word = 'EMEFORGE'
+  const wordW = ctx.measureText(word).width
+
+  const totalW = markSize + gap + wordW
+  const rightX = W - pad
+  const baseY = H - pad
+  const startX = rightX - totalW
+  const markCenterX = startX + markSize / 2
+  const markCenterY = baseY - fontPx * 0.4
+
+  ctx.save()
+  ctx.translate(markCenterX, markCenterY)
+  ctx.rotate((-3 * Math.PI) / 180)
+  ctx.shadowColor = 'rgba(0,0,0,0.5)'
+  ctx.shadowBlur = markSize * 0.15
+  ctx.fillStyle = LIME
+  ctx.fillRect(-markSize / 2, -markSize / 2, markSize, markSize)
+  ctx.shadowColor = 'transparent'
+  ctx.lineWidth = markSize * 0.12
+  ctx.strokeStyle = INK
+  ctx.strokeRect(-markSize / 2, -markSize / 2, markSize, markSize)
+  ctx.fillStyle = INK
+  ctx.font = `${fontPx * 0.85}px ${LOGO_FONT}`
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText('M', 0, markSize * 0.04)
+  ctx.restore()
+
+  ctx.font = `${fontPx}px ${LOGO_FONT}`
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'alphabetic'
+  ctx.lineWidth = fontPx * 0.22
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)'
+  ctx.lineJoin = 'round'
+  ctx.strokeText(word, startX + markSize + gap, baseY)
+  ctx.fillStyle = INK
+  ctx.fillText(word, startX + markSize + gap, baseY)
+
+  ctx.restore()
 }
 
 export async function drawImageLayer(

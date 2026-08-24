@@ -375,6 +375,37 @@ button.logo { cursor: pointer; }
 .handle-resize-diag {
   cursor: nwse-resize;
 }
+.stage-watermark {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.55;
+  pointer-events: none;
+  user-select: none;
+  z-index: 5;
+}
+.stage-watermark-mark {
+  font-family: "Anton", "Impact", sans-serif;
+  font-size: 11px;
+  line-height: 1;
+  background: #C8F02C;
+  color: #0E0E0E;
+  border: 1.5px solid #0E0E0E;
+  padding: 2px 4px 1px;
+  box-shadow: 1px 1px 0 0 #0E0E0E;
+  transform: rotate(-3deg);
+}
+.stage-watermark-word {
+  font-family: "Anton", "Impact", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  color: #0E0E0E;
+  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.85);
+  paint-order: stroke fill;
+}
 
 .panel { padding: 0; }
 .block {

@@ -104,6 +104,10 @@ const Stage = forwardRef<HTMLDivElement, StageProps>(function Stage(
             />
           )
         )}
+        <div className="stage-watermark" aria-hidden="true">
+          <span className="stage-watermark-mark">M</span>
+          <span className="stage-watermark-word">EMEFORGE</span>
+        </div>
       </div>
       <StageMeta image={image} box={box} count={layers.length} />
     </div>
