@@ -30,7 +30,7 @@ const TextLayer = memo(function TextLayer({ t, box, selected, onSelect, onUpdate
     e.preventDefault()
     onSelect(t.id)
     const { size } = t
-    startDrag(e.nativeEvent, (_, dy) => onUpdate(t.id, { size: clamp(size + dy / box.h, 0.02, 0.4) }))
+    startDrag(e.nativeEvent, (dx, dy) => onUpdate(t.id, { size: clamp(size + (dx + dy) / 2 / box.h, 0.02, 0.4) }))
   }
 
   const fontDef = FONTS.find((f) => f.id === t.font) || FONTS[0]
@@ -70,11 +70,11 @@ const TextLayer = memo(function TextLayer({ t, box, selected, onSelect, onUpdate
         <>
           <span className="layer-frame" />
           <span
-            className="handle handle-resize mono"
+            className="handle handle-resize handle-resize-diag mono"
             data-role="handle"
             onPointerDown={onResizeDown}
           >
-            ↕
+            ⤡
           </span>
         </>
       )}

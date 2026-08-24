@@ -372,6 +372,9 @@ button.logo { cursor: pointer; }
   right: -14px;
   bottom: -14px;
 }
+.handle-resize-diag {
+  cursor: nwse-resize;
+}
 
 .panel { padding: 0; }
 .block {
