@@ -91,6 +91,36 @@ describe('ImageLayer', () => {
     expect(onUpdate).not.toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ x: expect.any(Number) }))
   })
 
+  it('does not show rotate handle when not selected', () => {
+    render(<ImageLayer {...mkProps({ selected: false })} />)
+    expect(document.querySelector('.handle-rotate')).not.toBeInTheDocument()
+  })
+
+  it('shows rotate handle when selected', () => {
+    render(<ImageLayer {...mkProps({ selected: true })} />)
+    expect(document.querySelector('.handle-rotate')).toBeInTheDocument()
+  })
+
+  it('rotate handle pointerDown updates rotation on drag', () => {
+    const onUpdate = vi.fn()
+    render(<ImageLayer {...mkProps({ selected: true, onUpdate })} />)
+    const handle = document.querySelector('.handle-rotate')
+    fireEvent.pointerDown(handle, { clientX: 0, clientY: -50 })
+    fireEvent.pointerMove(window, { clientX: 50, clientY: 0 })
+    fireEvent.pointerUp(window)
+    expect(onUpdate).toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ rotation: expect.any(Number) }))
+  })
+
+  it('skips position drag when pointerDown originates on the rotate handle', () => {
+    const onUpdate = vi.fn()
+    render(<ImageLayer {...mkProps({ selected: true, onUpdate })} />)
+    const handle = document.querySelector('.handle-rotate')
+    fireEvent.pointerDown(handle, { clientX: 0, clientY: -50 })
+    fireEvent.pointerMove(window, { clientX: 100, clientY: -50 })
+    fireEvent.pointerUp(window)
+    expect(onUpdate).not.toHaveBeenCalledWith(expect.any(String), expect.objectContaining({ x: expect.any(Number) }))
+  })
+
   it('sets position style from layer x/y', () => {
     const layer = mkImageLayer({ src: 'test.png', x: 0.25, y: 0.75, w: 0.2, aspectRatio: 1, rotation: 0 })
     render(<ImageLayer {...mkProps({ layer })} />)

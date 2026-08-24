@@ -43,6 +43,24 @@ const ImageLayer = memo(function ImageLayer({ layer, box, selected, onSelect, on
     startDrag(e.nativeEvent, (dx) => onUpdate(layer.id, { w: clamp(w + (dx * 2) / box.w, 0.05, 1.5) }))
   }
 
+  const onRotateDown = (e: React.PointerEvent) => {
+    e.stopPropagation()
+    e.preventDefault()
+    onSelect(layer.id)
+    const rect = (e.currentTarget as HTMLElement).parentElement!.getBoundingClientRect()
+    const cx = rect.left + rect.width / 2
+    const cy = rect.top + rect.height / 2
+    const startAngle = Math.atan2(e.clientY - cy, e.clientX - cx)
+    const startX = e.clientX
+    const startY = e.clientY
+    const { rotation } = layer
+    startDrag(e.nativeEvent, (dx, dy) => {
+      const angle = Math.atan2(startY + dy - cy, startX + dx - cx)
+      const deltaDeg = (angle - startAngle) * (180 / Math.PI)
+      onUpdate(layer.id, { rotation: Math.round(rotation + deltaDeg) })
+    })
+  }
+
   return (
     <div
       className={'layer layer-img ' + (selected ? 'is-selected' : '')}
@@ -64,6 +82,13 @@ const ImageLayer = memo(function ImageLayer({ layer, box, selected, onSelect, on
             onPointerDown={onResizeDown}
           >
             ↔
+          </span>
+          <span
+            className="handle handle-rotate mono"
+            data-role="handle"
+            onPointerDown={onRotateDown}
+          >
+            ⟳
           </span>
         </>
       )}

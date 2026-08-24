@@ -375,6 +375,16 @@ button.logo { cursor: pointer; }
 .handle-resize-diag {
   cursor: nwse-resize;
 }
+.handle-rotate {
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  cursor: grab;
+}
+.handle-rotate:active {
+  cursor: grabbing;
+}
 .stage-watermark {
   position: absolute;
   right: 10px;
