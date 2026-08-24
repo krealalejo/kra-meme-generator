@@ -17,6 +17,21 @@ export default function ImageEditor({ layer, onUpdate, onDuplicate, onDelete }: 
   return (
     <div className="editor">
       <div className="ed-row">
+        <span className="ed-label">SIZE</span>
+        <div className="ed-control">
+          <input
+            type="range"
+            min={0.05}
+            max={1.5}
+            step={0.01}
+            value={layer.w}
+            onChange={(e) => onUpdate({ w: Number(e.target.value) })}
+          />
+          <span className="val mono">{Math.round(layer.w * 100)}</span>
+        </div>
+      </div>
+
+      <div className="ed-row">
         <span className="ed-label">ROTATE</span>
         <div className="ed-control">
           <input

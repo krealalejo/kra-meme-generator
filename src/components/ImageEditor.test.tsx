@@ -25,9 +25,9 @@ function mkProps(overrides = {}) {
 beforeEach(() => vi.clearAllMocks())
 
 describe('ImageEditor', () => {
-  it('renders rotation slider', () => {
+  it('renders size and rotation sliders', () => {
     render(<ImageEditor {...mkProps()} />)
-    expect(screen.getByRole('slider')).toBeInTheDocument()
+    expect(screen.getAllByRole('slider')).toHaveLength(2)
   })
 
   it('shows current rotation value', () => {
@@ -35,11 +35,23 @@ describe('ImageEditor', () => {
     expect(screen.getByText('30°')).toBeInTheDocument()
   })
 
+  it('shows current size value', () => {
+    render(<ImageEditor {...mkProps({ layer: mkImageLayer({ w: 0.4 }) })} />)
+    expect(screen.getByText('40')).toBeInTheDocument()
+  })
+
   it('calls onUpdate on rotation slider change', () => {
     const onUpdate = vi.fn()
     render(<ImageEditor {...mkProps({ onUpdate })} />)
-    fireEvent.change(screen.getByRole('slider'), { target: { value: '45' } })
+    fireEvent.change(screen.getAllByRole('slider')[1], { target: { value: '45' } })
     expect(onUpdate).toHaveBeenCalledWith({ rotation: 45 })
+  })
+
+  it('calls onUpdate on size slider change', () => {
+    const onUpdate = vi.fn()
+    render(<ImageEditor {...mkProps({ onUpdate })} />)
+    fireEvent.change(screen.getAllByRole('slider')[0], { target: { value: '0.6' } })
+    expect(onUpdate).toHaveBeenCalledWith({ w: 0.6 })
   })
 
   it('calls onDuplicate on duplicate click', () => {

@@ -216,7 +216,7 @@ describe('SidePanel — edit block', () => {
     const updateLayer = vi.fn()
     const layer = mkImageLayer({ src: 'img.png', rotation: 0 })
     render(<SidePanel {...base} layers={[layer]} selected={layer} selectedId={layer.id} updateLayer={updateLayer} />)
-    fireEvent.change(screen.getByRole('slider'), { target: { value: '30' } })
+    fireEvent.change(screen.getAllByRole('slider')[1], { target: { value: '30' } })
     expect(updateLayer).toHaveBeenCalledWith(layer.id, { rotation: 30 })
   })
 
