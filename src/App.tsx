@@ -12,6 +12,10 @@ import { mkText, mkImageLayer } from './utils/text'
 import { renderToBlob, triggerDownload } from './utils/canvas'
 import type { MemeImage, Layer, LayerPatch } from './types'
 
+const MAX_UPLOAD_BYTES = 20 * 1024 * 1024
+const TOO_LARGE_TOAST = `that image is over ${MAX_UPLOAD_BYTES / 1024 / 1024} MB`
+const READ_ERROR_TOAST = "couldn't read that file"
+
 export default function App() {
   const [image, setImage] = useState<MemeImage | null>(null)
   const [layers, setLayers] = useState<Layer[]>([])
@@ -119,7 +123,11 @@ export default function App() {
       setToast("that's not an image, friend")
       return
     }
-    readFileAsDataURL(file).then(loadImageSrc)
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setToast(TOO_LARGE_TOAST)
+      return
+    }
+    readFileAsDataURL(file).then(loadImageSrc).catch(() => setToast(READ_ERROR_TOAST))
   }, [loadImageSrc, readFileAsDataURL])
 
   const handleOverlayFile = useCallback((file: File | null | undefined) => {
@@ -128,7 +136,11 @@ export default function App() {
       setToast("that's not an image, friend")
       return
     }
-    readFileAsDataURL(file).then(addImageLayer)
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setToast(TOO_LARGE_TOAST)
+      return
+    }
+    readFileAsDataURL(file).then(addImageLayer).catch(() => setToast(READ_ERROR_TOAST))
   }, [addImageLayer, readFileAsDataURL])
 
   useEffect(() => {

@@ -55,7 +55,14 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers()
+  vi.restoreAllMocks()
 })
+
+function mkOversizedImage(name) {
+  const file = new File(['img'], name, { type: 'image/png' })
+  Object.defineProperty(file, 'size', { value: 20 * 1024 * 1024 + 1 })
+  return file
+}
 
 describe('App', () => {
   it('renders drop zone initially', () => {
@@ -580,5 +587,102 @@ describe('App', () => {
       { width: 0 },
       expect.objectContaining({ width: 360 }),
     )
+  })
+
+  it('shows toast and skips reading when main file input image exceeds 20 MB', async () => {
+    const readSpy = vi.spyOn(global.FileReader.prototype, 'readAsDataURL')
+    render(<App />)
+    const input = document.querySelector('input[accept="image/*"]')
+    const file = mkOversizedImage('big.png')
+    Object.defineProperty(input, 'files', { value: [file] })
+    fireEvent.change(input)
+    await waitFor(() => {
+      expect(screen.getByText(/over 20 MB/i)).toBeInTheDocument()
+    })
+    expect(readSpy).not.toHaveBeenCalled()
+    expect(screen.getByText(/drop an image/i)).toBeInTheDocument()
+  })
+
+  it('accepts an image exactly at the 20 MB limit', async () => {
+    render(<App />)
+    const input = document.querySelector('input[accept="image/*"]')
+    const file = new File(['img'], 'edge.png', { type: 'image/png' })
+    Object.defineProperty(file, 'size', { value: 20 * 1024 * 1024 })
+    Object.defineProperty(input, 'files', { value: [file] })
+    fireEvent.change(input)
+    await waitFor(() => {
+      expect(screen.queryByText(/drop an image/i)).not.toBeInTheDocument()
+    })
+    expect(screen.queryByText(/over 20 MB/i)).not.toBeInTheDocument()
+  })
+
+  it('shows toast when dropped image exceeds 20 MB', async () => {
+    render(<App />)
+    await act(async () => {
+      window.dispatchEvent(Object.assign(new Event('drop'), {
+        preventDefault: () => {},
+        dataTransfer: { files: [mkOversizedImage('drop.png')] },
+      }))
+    })
+    await waitFor(() => {
+      expect(screen.getByText(/over 20 MB/i)).toBeInTheDocument()
+    })
+    expect(screen.getByText(/drop an image/i)).toBeInTheDocument()
+  })
+
+  it('shows toast when pasted overlay image exceeds 20 MB', async () => {
+    render(<App />)
+    fireEvent.click(screen.getByText('PEPE MAGE'))
+    await waitFor(() => screen.getAllByText('TOP TEXT'))
+
+    const initialCount = document.querySelectorAll('.layer-row').length
+    const file = mkOversizedImage('paste.png')
+    const item = { type: 'image/png', getAsFile: () => file }
+
+    await act(async () => {
+      window.dispatchEvent(new ClipboardEvent('paste', {
+        clipboardData: { items: [item] },
+      }))
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText(/over 20 MB/i)).toBeInTheDocument()
+    })
+    expect(document.querySelectorAll('.layer-row').length).toBe(initialCount)
+  })
+
+  it('shows toast when main file cannot be read', async () => {
+    global.FileReader = class {
+      readAsDataURL() { this.onerror?.(new Error('read failed')) }
+    }
+    render(<App />)
+    const input = document.querySelector('input[accept="image/*"]')
+    const file = new File(['img'], 'broken.png', { type: 'image/png' })
+    Object.defineProperty(input, 'files', { value: [file] })
+    fireEvent.change(input)
+    await waitFor(() => {
+      expect(screen.getByText(/couldn't read that file/i)).toBeInTheDocument()
+    })
+    expect(screen.getByText(/drop an image/i)).toBeInTheDocument()
+  })
+
+  it('shows toast when overlay file cannot be read', async () => {
+    render(<App />)
+    fireEvent.click(screen.getByText('PEPE MAGE'))
+    await waitFor(() => screen.getAllByText('TOP TEXT'))
+
+    global.FileReader = class {
+      readAsDataURL() { this.onerror?.(new Error('read failed')) }
+    }
+    const initialCount = document.querySelectorAll('.layer-row').length
+    const overlayInput = document.querySelectorAll('input[accept="image/*"]')[1]
+    const file = new File(['img'], 'broken.png', { type: 'image/png' })
+    Object.defineProperty(overlayInput, 'files', { value: [file] })
+    fireEvent.change(overlayInput)
+
+    await waitFor(() => {
+      expect(screen.getByText(/couldn't read that file/i)).toBeInTheDocument()
+    })
+    expect(document.querySelectorAll('.layer-row').length).toBe(initialCount)
   })
 })
