@@ -23,9 +23,10 @@ interface SwatchesProps {
   colors: string[]
   value: string
   onChange: (c: string) => void
+  customLabel: string
 }
 
-function Swatches({ colors, value, onChange }: Readonly<SwatchesProps>) {
+function Swatches({ colors, value, onChange, customLabel }: Readonly<SwatchesProps>) {
   return (
     <div className="swatches">
       {colors.map((c) => (
@@ -38,7 +39,7 @@ function Swatches({ colors, value, onChange }: Readonly<SwatchesProps>) {
         />
       ))}
       <label className="swatch swatch-custom" title="custom">
-        <input type="color" value={value} onChange={(e) => onChange(e.target.value)} />
+        <input type="color" aria-label={customLabel} value={value} onChange={(e) => onChange(e.target.value)} />
         <span>+</span>
       </label>
     </div>
@@ -66,6 +67,7 @@ export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }: Reado
     <div className="editor" ref={editorRef}>
       <textarea
         className="ed-text"
+        aria-label="text"
         value={t.text}
         onChange={(e) => onUpdate({ text: e.target.value })}
         rows={2}
@@ -89,7 +91,7 @@ export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }: Reado
 
       <Row label="SIZE">
         <input
-          type="range" min="0.02" max="0.4" step="0.005" value={t.size}
+          type="range" aria-label="size" min="0.02" max="0.4" step="0.005" value={t.size}
           onChange={(e) => onUpdate({ size: Number.parseFloat(e.target.value) })}
         />
         <span className="mono val">{Math.round(t.size * 100)}</span>
@@ -97,7 +99,7 @@ export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }: Reado
 
       <Row label="ROTATE">
         <input
-          type="range" min="-45" max="45" step="1" value={t.rotation}
+          type="range" aria-label="rotate" min="-45" max="45" step="1" value={t.rotation}
           onChange={(e) => onUpdate({ rotation: Number.parseInt(e.target.value) })}
         />
         <span className="mono val">{t.rotation}°</span>
@@ -105,7 +107,7 @@ export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }: Reado
 
       <Row label="STROKE">
         <input
-          type="range" min="0" max="1" step="0.05" value={t.stroke}
+          type="range" aria-label="stroke" min="0" max="1" step="0.05" value={t.stroke}
           onChange={(e) => onUpdate({ stroke: Number.parseFloat(e.target.value) })}
         />
         <span className="mono val">{t.stroke.toFixed(2)}</span>
@@ -113,18 +115,18 @@ export default function TextEditor({ t, onUpdate, onDuplicate, onDelete }: Reado
 
       <Row label="TRACK">
         <input
-          type="range" min="-0.05" max="0.25" step="0.005" value={t.tracking}
+          type="range" aria-label="track" min="-0.05" max="0.25" step="0.005" value={t.tracking}
           onChange={(e) => onUpdate({ tracking: Number.parseFloat(e.target.value) })}
         />
         <span className="mono val">{t.tracking.toFixed(2)}</span>
       </Row>
 
       <Row label="FILL">
-        <Swatches colors={PRESET_COLORS} value={t.color} onChange={(c) => onUpdate({ color: c })} />
+        <Swatches colors={PRESET_COLORS} value={t.color} onChange={(c) => onUpdate({ color: c })} customLabel="custom fill color" />
       </Row>
 
       <Row label="EDGE">
-        <Swatches colors={STROKE_COLORS} value={t.strokeColor} onChange={(c) => onUpdate({ strokeColor: c })} />
+        <Swatches colors={STROKE_COLORS} value={t.strokeColor} onChange={(c) => onUpdate({ strokeColor: c })} customLabel="custom edge color" />
       </Row>
 
       <Row label="STYLE">

@@ -30,6 +30,12 @@ describe('ImageEditor', () => {
     expect(screen.getAllByRole('slider')).toHaveLength(2)
   })
 
+  it('gives the sliders accessible names', () => {
+    render(<ImageEditor {...mkProps()} />)
+    expect(screen.getByRole('slider', { name: 'size' })).toBeInTheDocument()
+    expect(screen.getByRole('slider', { name: 'rotate' })).toBeInTheDocument()
+  })
+
   it('shows current rotation value', () => {
     render(<ImageEditor {...mkProps({ layer: mkImageLayer({ rotation: 30 }) })} />)
     expect(screen.getByText('30°')).toBeInTheDocument()

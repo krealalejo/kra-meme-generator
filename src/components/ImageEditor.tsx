@@ -21,6 +21,7 @@ export default function ImageEditor({ layer, onUpdate, onDuplicate, onDelete }: 
         <div className="ed-control">
           <input
             type="range"
+            aria-label="size"
             min={0.05}
             max={1.5}
             step={0.01}
@@ -36,6 +37,7 @@ export default function ImageEditor({ layer, onUpdate, onDuplicate, onDelete }: 
         <div className="ed-control">
           <input
             type="range"
+            aria-label="rotate"
             min={-180}
             max={180}
             step={1}

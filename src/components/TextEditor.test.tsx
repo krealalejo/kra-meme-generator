@@ -30,6 +30,16 @@ describe('TextEditor', () => {
     expect(onUpdate).toHaveBeenCalledWith({ text: 'world' })
   })
 
+  it('gives the textarea, sliders and custom color inputs accessible names', () => {
+    render(<TextEditor t={mkT()} onUpdate={vi.fn()} onDuplicate={vi.fn()} onDelete={vi.fn()} />)
+    expect(screen.getByRole('textbox', { name: 'text' })).toBeInTheDocument()
+    for (const name of ['size', 'rotate', 'stroke', 'track']) {
+      expect(screen.getByRole('slider', { name })).toBeInTheDocument()
+    }
+    expect(screen.getByLabelText('custom fill color')).toHaveAttribute('type', 'color')
+    expect(screen.getByLabelText('custom edge color')).toHaveAttribute('type', 'color')
+  })
+
   it('renders all font buttons', () => {
     render(<TextEditor t={mkT()} onUpdate={vi.fn()} onDuplicate={vi.fn()} onDelete={vi.fn()} />)
     for (const f of FONTS) {
