@@ -213,7 +213,7 @@ export default function CropModal({ layer, onSave, onClose }: Readonly<CropModal
           )}
 
           {mode === 'draw' && lassoPoints && lassoPoints.length > 1 && (
-            <svg className="crop-lasso-svg">
+            <svg className="crop-lasso-svg" aria-hidden="true">
               {drawing ? (
                 <polyline points={lassoStr} fill="rgba(255,255,255,0.12)" stroke="white" strokeWidth="2" strokeDasharray="5,3" strokeLinejoin="round" />
               ) : (

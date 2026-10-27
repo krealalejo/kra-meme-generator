@@ -127,10 +127,10 @@ describe('App', () => {
     render(<App />)
     fireEvent.click(screen.getByText('PEPE MAGE'))
     await waitFor(() => screen.getAllByText('TOP TEXT'))
-    const rows = document.querySelectorAll('.layer-row')
+    const rows = document.querySelectorAll('.layer-row-select')
     fireEvent.click(rows[0])
     await waitFor(() => {
-      expect(rows[0]).toHaveClass('is-active')
+      expect(rows[0].closest('.layer-row')).toHaveClass('is-active')
     })
   })
 
@@ -158,7 +158,7 @@ describe('App', () => {
     render(<App />)
     fireEvent.click(screen.getByText('PEPE MAGE'))
     await waitFor(() => screen.getAllByText('TOP TEXT'))
-    const rows = document.querySelectorAll('.layer-row')
+    const rows = document.querySelectorAll('.layer-row-select')
     fireEvent.click(rows[0])
     await waitFor(() => screen.getByText('duplicate'))
     const initialCount = document.querySelectorAll('.layer-row').length
@@ -224,7 +224,7 @@ describe('App', () => {
     render(<App />)
     fireEvent.click(screen.getByText('PEPE MAGE'))
     await waitFor(() => screen.getAllByText('TOP TEXT'))
-    const rows = document.querySelectorAll('.layer-row')
+    const rows = document.querySelectorAll('.layer-row-select')
     fireEvent.click(rows[0])
     await waitFor(() => screen.getByText('duplicate'))
     const textarea = document.querySelector('textarea.ed-text')
@@ -360,7 +360,7 @@ describe('App', () => {
     fireEvent.click(screen.getByText('PEPE MAGE'))
     await waitFor(() => screen.getAllByText('TOP TEXT'))
 
-    const rows = document.querySelectorAll('.layer-row')
+    const rows = document.querySelectorAll('.layer-row-select')
     const dt = { effectAllowed: '', dropEffect: '' }
     fireEvent.dragStart(rows[0], { dataTransfer: dt })
     fireEvent.dragOver(rows[1], { dataTransfer: dt })
@@ -376,7 +376,7 @@ describe('App', () => {
     fireEvent.click(screen.getByText('PEPE MAGE'))
     await waitFor(() => screen.getAllByText('TOP TEXT'))
 
-    const rows = document.querySelectorAll('.layer-row')
+    const rows = document.querySelectorAll('.layer-row-select')
     const dt = { effectAllowed: '', dropEffect: '' }
     fireEvent.dragStart(rows[0], { dataTransfer: dt })
     fireEvent.dragOver(rows[0], { dataTransfer: dt })
@@ -394,7 +394,7 @@ describe('App', () => {
     fireEvent.click(screen.getByText('PEPE MAGE'))
     await waitFor(() => screen.getAllByText('TOP TEXT'))
 
-    const rows = document.querySelectorAll('.layer-row')
+    const rows = document.querySelectorAll('.layer-row-select')
     fireEvent.click(rows[0])
 
     await waitFor(() => {
@@ -406,7 +406,7 @@ describe('App', () => {
     const clickSpy = vi.spyOn(HTMLInputElement.prototype, 'click').mockImplementation(() => {})
     render(<App />)
 
-    fireEvent.click(document.querySelector('.drop'))
+    fireEvent.click(document.querySelector('.drop-pick'))
 
     expect(clickSpy).toHaveBeenCalled()
     clickSpy.mockRestore()
@@ -502,9 +502,9 @@ describe('App', () => {
     fireEvent.click(screen.getByText('PEPE MAGE'))
     await waitFor(() => screen.getAllByText('TOP TEXT'))
 
-    const rows = document.querySelectorAll('.layer-row')
+    const rows = document.querySelectorAll('.layer-row-select')
     fireEvent.click(rows[0])
-    await waitFor(() => expect(rows[0]).toHaveClass('is-active'))
+    await waitFor(() => expect(rows[0].closest('.layer-row')).toHaveClass('is-active'))
 
     fireEvent.click(document.querySelectorAll('.layer-row-x')[0])
 

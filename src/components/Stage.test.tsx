@@ -122,11 +122,17 @@ describe('Stage', () => {
     expect(updateLayer).toHaveBeenCalledWith(layer.id, { text: 'updated' })
   })
 
-  it('calls setSelectedId(null) when clicking stage background', () => {
+  it('calls setSelectedId(null) when pressing the stage background', () => {
     const setSelectedId = vi.fn()
-    const { container } = render(<Stage {...makeProps({ setSelectedId })} />)
-    const stageEl = container.querySelector('.stage')
-    fireEvent.mouseDown(stageEl)
+    render(<Stage {...makeProps({ setSelectedId })} />)
+    fireEvent.mouseDown(screen.getByRole('button', { name: 'Deselect layer' }))
+    expect(setSelectedId).toHaveBeenCalledWith(null)
+  })
+
+  it('deselects from the keyboard through the native background button', () => {
+    const setSelectedId = vi.fn()
+    render(<Stage {...makeProps({ setSelectedId })} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Deselect layer' }))
     expect(setSelectedId).toHaveBeenCalledWith(null)
   })
 

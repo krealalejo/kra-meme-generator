@@ -22,10 +22,10 @@ describe('DropZone', () => {
     expect(screen.getByText('PEPE')).toBeInTheDocument()
   })
 
-  it('calls onPickFile when drop zone clicked', () => {
+  it('calls onPickFile when the upload button is clicked', () => {
     const onPickFile = vi.fn()
     render(<DropZone onPickFile={onPickFile} onSample={vi.fn()} />)
-    fireEvent.click(document.querySelector('.drop'))
+    fireEvent.click(screen.getByRole('button', { name: 'Upload an image' }))
     expect(onPickFile).toHaveBeenCalledOnce()
   })
 
@@ -59,24 +59,10 @@ describe('DropZone', () => {
     expect(onSample).toHaveBeenCalledOnce()
   })
 
-  it('calls onPickFile when Enter pressed on drop zone', () => {
-    const onPickFile = vi.fn()
-    render(<DropZone onPickFile={onPickFile} onSample={vi.fn()} />)
-    fireEvent.keyDown(document.querySelector('.drop'), { key: 'Enter' })
-    expect(onPickFile).toHaveBeenCalledOnce()
-  })
-
-  it('calls onPickFile when Space pressed on drop zone', () => {
-    const onPickFile = vi.fn()
-    render(<DropZone onPickFile={onPickFile} onSample={vi.fn()} />)
-    fireEvent.keyDown(document.querySelector('.drop'), { key: ' ' })
-    expect(onPickFile).toHaveBeenCalledOnce()
-  })
-
-  it('ignores other keys on drop zone', () => {
-    const onPickFile = vi.fn()
-    render(<DropZone onPickFile={onPickFile} onSample={vi.fn()} />)
-    fireEvent.keyDown(document.querySelector('.drop'), { key: 'a' })
-    expect(onPickFile).not.toHaveBeenCalled()
+  it('exposes the upload action as a native keyboard-operable button', () => {
+    render(<DropZone onPickFile={vi.fn()} onSample={vi.fn()} />)
+    const pick = screen.getByRole('button', { name: 'Upload an image' })
+    expect(pick.tagName).toBe('BUTTON')
+    expect(pick).toHaveAttribute('type', 'button')
   })
 })

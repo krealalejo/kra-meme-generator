@@ -55,16 +55,13 @@ export default function DropZone({ onPickFile, onSample }: Readonly<DropZoneProp
 
   return (
     <div
-      role="button"
-      tabIndex={0}
       ref={dropRef}
       className={'drop ' + (hover ? 'is-hover' : '')}
       onDragEnter={() => setHover(true)}
       onDragLeave={() => setHover(false)}
       onDrop={() => setHover(false)}
-      onClick={onPickFile}
-      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onPickFile() } }}
     >
+      <button type="button" className="drop-pick" aria-label="Upload an image" onClick={onPickFile} />
       <div className="drop-inner">
         <h1 className="drop-title">
           drop an image

@@ -99,16 +99,12 @@ export default function SidePanel({
               {layers.map((l, idx) => (
                 <div
                   key={l.id}
-                  role="button"
-                  tabIndex={0}
                   draggable
                   className={[
                     'layer-row',
                     l.id === selectedId ? 'is-active' : '',
                     dragOver === idx ? 'is-drag-over' : '',
                   ].filter(Boolean).join(' ')}
-                  onClick={() => setSelectedId(l.id)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelectedId(l.id) }}
                   onDragStart={(e) => {
                     dragSrc.current = idx
                     e.dataTransfer.effectAllowed = 'move'
@@ -126,14 +122,20 @@ export default function SidePanel({
                     dragSrc.current = null
                   }}
                   onDragEnd={() => { dragSrc.current = null; setDragOver(null) }}
-                  aria-pressed={l.id === selectedId}
                 >
-                  <span className="layer-row-drag" aria-hidden>⠿</span>
-                  <span className="layer-row-idx mono">{String(idx + 1).padStart(2, '0')}</span>
-                  <span className="layer-row-type mono">{l.type === 'image' ? 'IMG' : 'TXT'}</span>
-                  <span className="layer-row-text">
-                    {l.type === 'image' ? '[image]' : (l.text || '(empty)')}
-                  </span>
+                  <button
+                    type="button"
+                    className="layer-row-select"
+                    aria-pressed={l.id === selectedId}
+                    onClick={() => setSelectedId(l.id)}
+                  >
+                    <span className="layer-row-drag" aria-hidden>⠿</span>
+                    <span className="layer-row-idx mono">{String(idx + 1).padStart(2, '0')}</span>
+                    <span className="layer-row-type mono">{l.type === 'image' ? 'IMG' : 'TXT'}</span>
+                    <span className="layer-row-text">
+                      {l.type === 'image' ? '[image]' : (l.text || '(empty)')}
+                    </span>
+                  </button>
                   <button
                     type="button"
                     className="layer-row-x"

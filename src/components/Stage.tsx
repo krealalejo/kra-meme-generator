@@ -80,9 +80,15 @@ const Stage = forwardRef<HTMLDivElement, StageProps>(function Stage(
           else if (ref) ref.current = el
         }}
         style={{ width: box.w, height: box.h }}
-        onMouseDown={(e) => { if ((e.target as HTMLElement).classList.contains('stage')) setSelectedId(null) }}
       >
         <img className="stage-img" src={image.src} alt="" draggable={false} />
+        <button
+          type="button"
+          className="stage-deselect"
+          aria-label="Deselect layer"
+          onMouseDown={() => setSelectedId(null)}
+          onClick={() => setSelectedId(null)}
+        />
         {layers.map((layer) =>
           layer.type === 'image' ? (
             <ImageLayer

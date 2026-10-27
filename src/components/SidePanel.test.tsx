@@ -128,31 +128,14 @@ describe('SidePanel — layers block', () => {
     expect(screen.getByText('1 item')).toBeInTheDocument()
   })
 
-  it('calls setSelectedId when Enter pressed on layer row', () => {
+  it('selects a layer from its native select button', () => {
     const setSelectedId = vi.fn()
     const layer = mkText({ text: 'KEYNAV' })
     render(<SidePanel {...base} layers={[layer]} setSelectedId={setSelectedId} />)
-    const row = screen.getByText('KEYNAV').closest('.layer-row')
-    fireEvent.keyDown(row, { key: 'Enter' })
+    const select = screen.getByRole('button', { name: /KEYNAV/ })
+    expect(select.tagName).toBe('BUTTON')
+    fireEvent.click(select)
     expect(setSelectedId).toHaveBeenCalledWith(layer.id)
-  })
-
-  it('calls setSelectedId when Space pressed on layer row', () => {
-    const setSelectedId = vi.fn()
-    const layer = mkText({ text: 'SPACENAV' })
-    render(<SidePanel {...base} layers={[layer]} setSelectedId={setSelectedId} />)
-    const row = screen.getByText('SPACENAV').closest('.layer-row')
-    fireEvent.keyDown(row, { key: ' ' })
-    expect(setSelectedId).toHaveBeenCalledWith(layer.id)
-  })
-
-  it('ignores other keys on layer row', () => {
-    const setSelectedId = vi.fn()
-    const layer = mkText({ text: 'OTHERKEY' })
-    render(<SidePanel {...base} layers={[layer]} setSelectedId={setSelectedId} />)
-    const row = screen.getByText('OTHERKEY').closest('.layer-row')
-    fireEvent.keyDown(row, { key: 'Escape' })
-    expect(setSelectedId).not.toHaveBeenCalled()
   })
 
   it('shows (empty) for text layer with no text', () => {
@@ -164,7 +147,7 @@ describe('SidePanel — layers block', () => {
   it('clears drag-over state on drag leave', () => {
     const layers = [mkText({ text: 'A' }), mkText({ text: 'B' })]
     render(<SidePanel {...base} layers={layers} />)
-    const rows = screen.getAllByRole('button', { name: /A|B/ })
+    const rows = screen.getAllByRole('button', { name: /A|B/ }).map((button) => button.closest('.layer-row'))
     fireEvent.dragOver(rows[1], { dataTransfer: { dropEffect: '' } })
     expect(rows[1]).toHaveClass('is-drag-over')
     fireEvent.dragLeave(rows[1])
@@ -175,7 +158,7 @@ describe('SidePanel — layers block', () => {
     const reorderLayers = vi.fn()
     const layers = [mkText({ text: 'A' }), mkText({ text: 'B' })]
     render(<SidePanel {...base} layers={layers} reorderLayers={reorderLayers} />)
-    const rows = screen.getAllByRole('button', { name: /A|B/ })
+    const rows = screen.getAllByRole('button', { name: /A|B/ }).map((button) => button.closest('.layer-row'))
     fireEvent.dragStart(rows[0], { dataTransfer: { effectAllowed: '' } })
     fireEvent.dragEnd(rows[0])
     fireEvent.drop(rows[1], { dataTransfer: {} })
@@ -186,7 +169,7 @@ describe('SidePanel — layers block', () => {
     const reorderLayers = vi.fn()
     const layers = [mkText({ text: 'A' }), mkText({ text: 'B' })]
     render(<SidePanel {...base} layers={layers} reorderLayers={reorderLayers} />)
-    const rows = screen.getAllByRole('button', { name: /A|B/ })
+    const rows = screen.getAllByRole('button', { name: /A|B/ }).map((button) => button.closest('.layer-row'))
     fireEvent.dragStart(rows[0], { dataTransfer: { effectAllowed: '' } })
     fireEvent.dragOver(rows[1], { dataTransfer: { dropEffect: '' }, preventDefault: () => {} })
     fireEvent.drop(rows[1], { preventDefault: () => {} })
