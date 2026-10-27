@@ -14,7 +14,10 @@ export function triggerDownload(blob: Blob, name: string): void {
 
 export async function renderToBlob(image: MemeImage, layers: Layer[], scale = 2): Promise<Blob> {
   await document.fonts.ready
-  const img = await loadImg(image.src)
+  const [img, layerImages] = await Promise.all([
+    loadImg(image.src),
+    Promise.all(layers.map((layer) => (layer.type === 'image' ? loadImg(layer.src) : null))),
+  ])
   const W = image.w * scale
   const H = image.h * scale
   const canvas = document.createElement('canvas')
@@ -24,13 +27,14 @@ export async function renderToBlob(image: MemeImage, layers: Layer[], scale = 2)
   ctx.imageSmoothingEnabled = true
   ctx.imageSmoothingQuality = 'high'
   ctx.drawImage(img, 0, 0, W, H)
-  for (const layer of layers) {
-    if (layer.type === 'image') {
-      await drawImageLayer(ctx, layer, W, H)
-    } else {
+  layers.forEach((layer, index) => {
+    const layerImage = layerImages[index]
+    if (layer.type === 'image' && layerImage) {
+      drawLoadedImageLayer(ctx, layer, layerImage, W, H)
+    } else if (layer.type === 'text') {
       drawText(ctx, layer, W, H)
     }
-  }
+  })
   drawWatermark(ctx, W, H)
   return new Promise<Blob>((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error('toBlob failed'))), 'image/png')
@@ -98,7 +102,16 @@ export async function drawImageLayer(
   W: number,
   H: number
 ): Promise<void> {
-  const img = await loadImg(layer.src)
+  drawLoadedImageLayer(ctx, layer, await loadImg(layer.src), W, H)
+}
+
+function drawLoadedImageLayer(
+  ctx: CanvasRenderingContext2D,
+  layer: ImageLayerData,
+  img: HTMLImageElement,
+  W: number,
+  H: number
+): void {
   const pxW = layer.w * W
   const pxH = pxW / layer.aspectRatio
   ctx.save()
