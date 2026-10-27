@@ -301,13 +301,16 @@ export default function App() {
 
   const handleDownload = () =>
     runGenAnimation(
-      async (blob) => triggerDownload(blob, `meme-${Date.now()}.png`),
+      (blob) => {
+        triggerDownload(blob, `meme-${Date.now()}.png`)
+        return Promise.resolve()
+      },
       'SAVED ✓'
     )
 
   const handleCopy = () =>
     runGenAnimation(
-      async (blob) => navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]),
+      (blob) => navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]),
       'COPIED ✓'
     )
 
